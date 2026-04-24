@@ -1,0 +1,21 @@
+{
+  "name": "brew-backend",
+  "version": "1.0.0",
+  "description": "Backend for BREW Coffee App",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "expo-server-sdk": "^6.1.0",
+    "express": "^4.22.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
