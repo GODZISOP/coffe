@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BREW - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#2d2928",
+                      "surface-tint": "#e9c349",
+                      "on-background": "#e9e1de",
+                      "secondary": "#d2c4b2",
+                      "on-secondary": "#372f22",
+                      "on-secondary-fixed-variant": "#4f4538",
+                      "outline-variant": "#4d4635",
+                      "on-tertiary-fixed": "#251913",
+                      "secondary-container": "#51483a",
+                      "surface-variant": "#383432",
+                      "on-error": "#690005",
+                      "on-secondary-fixed": "#221a0f",
+                      "on-primary-fixed-variant": "#574500",
+                      "surface-container-lowest": "#110d0c",
+                      "surface-container": "#231f1d",
+                      "error-container": "#93000a",
+                      "background": "#161311",
+                      "primary-fixed-dim": "#e9c349",
+                      "on-primary-container": "#554300",
+                      "inverse-primary": "#735c00",
+                      "on-secondary-container": "#c4b6a5",
+                      "on-error-container": "#ffdad6",
+                      "error": "#ffb4ab",
+                      "outline": "#99907c",
+                      "tertiary-container": "#c4afa6",
+                      "secondary-fixed-dim": "#d2c4b2",
+                      "on-primary-fixed": "#241a00",
+                      "on-surface": "#e9e1de",
+                      "on-surface-variant": "#d0c5af",
+                      "primary-container": "#d4af37",
+                      "surface-dim": "#161311",
+                      "inverse-on-surface": "#342f2e",
+                      "surface-container-highest": "#383432",
+                      "on-tertiary-fixed-variant": "#53433d",
+                      "primary": "#f2ca50",
+                      "surface-container-low": "#1e1b19",
+                      "tertiary": "#e1cac1",
+                      "surface-bright": "#3d3837",
+                      "tertiary-fixed-dim": "#d8c2b9",
+                      "primary-fixed": "#ffe088",
+                      "inverse-surface": "#e9e1de",
+                      "on-tertiary-container": "#51423b",
+                      "surface": "#161311",
+                      "on-primary": "#3c2f00",
+                      "secondary-fixed": "#efe0cd",
+                      "tertiary-fixed": "#f5ded5",
+                      "on-tertiary": "#3b2d27"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "margin-mobile": "20px",
+                      "base": "8px",
+                      "sm": "12px",
+                      "xl": "64px",
+                      "md": "24px",
+                      "lg": "40px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "label-md": ["Manrope"],
+                      "headline-md": ["Noto Serif"],
+                      "headline-xl": ["Noto Serif"],
+                      "body-lg": ["Manrope"],
+                      "body-sm": ["Manrope"],
+                      "headline-lg": ["Noto Serif"],
+                      "label-sm": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "label-lg": ["Manrope"]
+              },
+              "fontSize": {
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-sm": ["10px", {"lineHeight": "12px", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .brew-points-card {
+            background: linear-gradient(135deg, #d4af37 0%, #f2ca50 50%, #ffe088 100%);
+        }
+        .order-card {
+            background: linear-gradient(to right, rgba(45, 41, 40, 0.5), rgba(35, 31, 29, 0.3));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased pb-32">
+<!-- Top AppBar -->
+<header class="bg-stone-950/95 text-amber-400 font-noto-serif tracking-widest uppercase flex justify-between items-center w-full px-6 h-16 fixed top-0 z-50 backdrop-blur-md border-b border-stone-800/50 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+<button class="p-2 active:scale-95 duration-200">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="text-2xl font-bold text-amber-400 dark:text-[#D4AF37]">BREW</h1>
+<div class="h-10 w-10 rounded-full overflow-hidden border border-amber-400/30">
+<img class="h-full w-full object-cover" data-alt="close-up portrait of a stylish man with a well-groomed beard, soft studio lighting, professional and clean aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4nqF7veH1-w8GVhyLWtfESKCga6lWSsoPs9zoBGO7N__4SZz3C_-cOO2fuBfoY-APBhFr4nN7dut4SWQf0nlPl0TQQUH2LjqPsbyVKZQsyEhpRJXJePAbPW79OUqo2WXEEs1r44amtsXpuHa1VSuxssAc_5Pl6eJg_MJBbnkHP0tiACu2zb6mvIPCrGWnDRchzytrn74LlZCaQmLJ5vlvEp5d8s1SFbTUlhLM1aHYzSBVfVwelXrrPvEp36gqkzXKXK-hecBXQEI"/>
+</div>
+</header>
+<main class="mt-20 px-margin-mobile md:px-0 max-w-2xl mx-auto space-y-lg">
+<!-- User Identity & Loyalty -->
+<section class="space-y-md">
+<div class="flex items-center gap-md">
+<div class="space-y-xs">
+<h2 class="font-headline-md text-headline-md text-on-surface">Julian Thorne</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Connoisseur Member since 2023</p>
+</div>
+</div>
+<!-- Loyalty Card -->
+<div class="brew-points-card rounded-xl p-md shadow-2xl relative overflow-hidden group transition-transform duration-300 hover:scale-[1.02]">
+<div class="relative z-10 flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<div class="space-y-1">
+<p class="font-label-sm text-label-sm text-on-primary/70 uppercase tracking-widest">Brew Points</p>
+<p class="font-headline-lg text-headline-lg text-on-primary">1,240</p>
+</div>
+<span class="material-symbols-outlined text-on-primary text-4xl" data-weight="fill">loyalty</span>
+</div>
+<div class="flex justify-between items-end">
+<p class="font-label-md text-label-md text-on-primary/80">Next reward at 1,500 pts</p>
+<div class="bg-on-primary/10 px-3 py-1 rounded-full backdrop-blur-sm border border-on-primary/20">
+<span class="font-label-sm text-label-sm text-on-primary">Gold Tier</span>
+</div>
+</div>
+</div>
+<!-- Decorative background elements -->
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+</div>
+</section>
+<!-- User Preferences Bento -->
+<section class="space-y-sm">
+<h3 class="font-label-lg text-label-lg text-secondary uppercase tracking-widest px-1">My Ritual</h3>
+<div class="grid grid-cols-2 gap-sm">
+<div class="bg-surface-container-low border border-outline/10 p-md rounded-xl flex flex-col gap-sm">
+<span class="material-symbols-outlined text-primary">water_drop</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Default Milk</p>
+<p class="font-body-lg text-body-lg text-on-surface">Oat Milk</p>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline/10 p-md rounded-xl flex flex-col gap-sm">
+<span class="material-symbols-outlined text-primary">candlestick_chart</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Sugar Level</p>
+<p class="font-body-lg text-body-lg text-on-surface">Normal</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Past Orders -->
+<section class="space-y-sm">
+<div class="flex justify-between items-center px-1">
+<h3 class="font-label-lg text-label-lg text-secondary uppercase tracking-widest">Recent Orders</h3>
+<button class="font-label-md text-label-md text-primary">View All</button>
+</div>
+<div class="space-y-sm">
+<!-- Order Item 1 -->
+<div class="order-card p-md rounded-xl border border-outline/5 flex items-center justify-between group">
+<div class="flex gap-md items-center">
+<div class="h-16 w-16 rounded-lg overflow-hidden bg-surface-variant">
+<img class="h-full w-full object-cover" data-alt="close-up of a perfectly poured cafe latte with intricate heart-shaped foam art in a dark ceramic cup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPGuYlQIEzE7S9tjze9BEad2jBdrmkPVBoLnSabAm5lpO66ulrKlBGtPIzVjIl03yaXg2BKRc3mmJDMTs_RVNYzHcTomFvIkO9Y84ZvhORUGtXxg2ay57kBZQjrNgiTjjEiyav1vOXQDyLhMCKO150o7SrJGtxXljmUba6jwI5FanyC60S7ZYWS-k6DaGuQWnU-dcCZfj3L5PrB7pXfyF2oOWmkbII94JjC0joFmS3yxbfVHSUr2sOjvznXOlsI0lh2pDA4YVioIc"/>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Madagascar Vanilla Latte</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Today, 08:45 AM • $6.50</p>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md font-bold transition-transform active:scale-95 hover:bg-primary/90">
+                        Reorder
+                    </button>
+</div>
+<!-- Order Item 2 -->
+<div class="order-card p-md rounded-xl border border-outline/5 flex items-center justify-between group">
+<div class="flex gap-md items-center">
+<div class="h-16 w-16 rounded-lg overflow-hidden bg-surface-variant">
+<img class="h-full w-full object-cover" data-alt="rich dark espresso shot with golden crema in a minimalist designer glass cup on a dark stone surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWtWvFecMGU7eFxBxhkoB7pimr0o4Mra6nxh0QZITRPgFvABp3UqLWWlnJ-9TEqBfd-G6tVY-kYoy5TtGt8TFvd2Ccahky-Wo0-K1rQyDxMwl2bw8YG5mVY0l18DNfP0oGXXsDMAxKc2_uFZ3gLPOsexDqf0JkbN7ldyRURju_0a48IbCbKW-7n-JDpWAKGEBL8M3oVHZskTubeS0stoBgGLNH7I_o-lxh2Jhi5zQemN7n8HFK8ONFSpzXaEnpkiZKenfhjLNLMzc"/>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold">Double Ristretto</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Yesterday • $4.00</p>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md font-bold transition-transform active:scale-95 hover:bg-primary/90">
+                        Reorder
+                    </button>
+</div>
+</div>
+</section>
+<!-- Payment Methods -->
+<section class="space-y-sm">
+<h3 class="font-label-lg text-label-lg text-secondary uppercase tracking-widest px-1">Payment Methods</h3>
+<div class="bg-surface-container border border-outline/10 rounded-xl overflow-hidden divide-y divide-outline/5">
+<div class="p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant">credit_card</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface">•••• 4429</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Primary • Expires 08/26</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+<div class="p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant">account_balance_wallet</span>
+<div>
+<p class="font-body-md text-body-md text-on-surface">Apple Pay</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Account Settings -->
+<section class="space-y-sm pb-8">
+<h3 class="font-label-lg text-label-lg text-secondary uppercase tracking-widest px-1">Settings</h3>
+<div class="space-y-xs">
+<button class="w-full text-left p-md flex items-center justify-between hover:bg-surface-container-low transition-colors rounded-xl">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<p class="font-body-md text-body-md text-on-surface">Notification Settings</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full text-left p-md flex items-center justify-between hover:bg-surface-container-low transition-colors rounded-xl">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant">shield</span>
+<p class="font-body-md text-body-md text-on-surface">Privacy &amp; Security</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="w-full text-left p-md flex items-center justify-between text-error hover:bg-error/5 transition-colors rounded-xl mt-4">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined">logout</span>
+<p class="font-body-md text-body-md">Sign Out</p>
+</div>
+</button>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 h-20 pb-safe shadow-2xl bg-stone-950/98 border-t border-stone-800/30 font-noto-serif text-[10px] font-medium tracking-tight">
+<a class="flex flex-col items-center justify-center text-stone-500 hover:text-amber-200 transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span>Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 hover:text-amber-200 transition-all" href="#">
+<span class="material-symbols-outlined">local_cafe</span>
+<span>Menu</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 hover:text-amber-200 transition-all" href="#">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span>Cart</span>
+</a>
+<a class="flex flex-col items-center justify-center text-amber-400 bg-stone-900/50 rounded-xl px-3 py-1 scale-110 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span>Profile</span>
+</a>
+</nav>
+</body></html>

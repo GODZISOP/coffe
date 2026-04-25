@@ -1,11 +1,27 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment Variables
 .env
 .env.*
-node_modules/
+**/.env
+**/.env.*
+
+# Build Artifacts
 dist/
+**/dist/
 build/
+**/build/
 .expo/
+**/.expo/
+
+# Logs
 *.log
-# Exclude other apps if they are not requested
-# Include all app folders
-# coffe-app/
-# frontend-app/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db

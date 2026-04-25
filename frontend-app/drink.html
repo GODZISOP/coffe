@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-high": "#2d2928",
+                    "surface-tint": "#e9c349",
+                    "on-background": "#e9e1de",
+                    "secondary": "#d2c4b2",
+                    "on-secondary": "#372f22",
+                    "on-secondary-fixed-variant": "#4f4538",
+                    "outline-variant": "#4d4635",
+                    "on-tertiary-fixed": "#251913",
+                    "secondary-container": "#51483a",
+                    "surface-variant": "#383432",
+                    "on-error": "#690005",
+                    "on-secondary-fixed": "#221a0f",
+                    "on-primary-fixed-variant": "#574500",
+                    "surface-container-lowest": "#110d0c",
+                    "surface-container": "#231f1d",
+                    "error-container": "#93000a",
+                    "background": "#161311",
+                    "primary-fixed-dim": "#e9c349",
+                    "on-primary-container": "#554300",
+                    "inverse-primary": "#735c00",
+                    "on-secondary-container": "#c4b6a5",
+                    "on-error-container": "#ffdad6",
+                    "error": "#ffb4ab",
+                    "outline": "#99907c",
+                    "tertiary-container": "#c4afa6",
+                    "secondary-fixed-dim": "#d2c4b2",
+                    "on-primary-fixed": "#241a00",
+                    "on-surface": "#e9e1de",
+                    "on-surface-variant": "#d0c5af",
+                    "primary-container": "#d4af37",
+                    "surface-dim": "#161311",
+                    "inverse-on-surface": "#342f2e",
+                    "surface-container-highest": "#383432",
+                    "on-tertiary-fixed-variant": "#53433d",
+                    "primary": "#f2ca50",
+                    "surface-container-low": "#1e1b19",
+                    "tertiary": "#e1cac1",
+                    "surface-bright": "#3d3837",
+                    "tertiary-fixed-dim": "#d8c2b9",
+                    "primary-fixed": "#ffe088",
+                    "inverse-surface": "#e9e1de",
+                    "on-tertiary-container": "#51423b",
+                    "surface": "#161311",
+                    "on-primary": "#3c2f00",
+                    "secondary-fixed": "#efe0cd",
+                    "tertiary-fixed": "#f5ded5",
+                    "on-tertiary": "#3b2d27"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "margin-mobile": "20px",
+                    "base": "8px",
+                    "sm": "12px",
+                    "xl": "64px",
+                    "md": "24px",
+                    "lg": "40px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-md": ["manrope"],
+                    "headline-md": ["Noto Serif"],
+                    "headline-xl": ["Noto Serif"],
+                    "body-lg": ["manrope"],
+                    "body-sm": ["manrope"],
+                    "headline-lg": ["Noto Serif"],
+                    "label-sm": ["manrope"],
+                    "body-md": ["manrope"],
+                    "label-lg": ["manrope"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-sm": ["10px", {"lineHeight": "12px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased mb-24">
+<!-- Header Navigation -->
+<header class="flex justify-between items-center w-full px-6 h-16 fixed top-0 z-50 backdrop-blur-md bg-stone-950/95 border-b border-stone-800/50 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+<button class="text-amber-400 hover:text-amber-200 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<span class="text-2xl font-bold text-amber-400 dark:text-[#D4AF37] font-noto-serif tracking-widest uppercase">BREW</span>
+<button class="text-stone-500 hover:text-amber-200 transition-colors">
+<span class="material-symbols-outlined" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</header>
+<!-- Hero Product Image -->
+<section class="relative h-[530px] w-full overflow-hidden">
+<img alt="Golden Honey Latte" class="w-full h-full object-cover" data-alt="Close-up of a premium golden honey latte in a glass cup with artistic foam swirl, warm golden honey drizzled, dark atmospheric background with soft bokeh" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACPTjErFH0MkfBmmd6Pt4RGhFaTlhOS0pw0OAdUVbMi9Gz5z_MU7F_nJbnfvhdAslqIIsW2_A0G1Lus_EI8mAJ1O2pa-zjL60qUDqoM3_15CvBOtianKQ6io1Xlnh_88F_viTVRrZ62w8mYtultiy2jvD1t3mfMWVC3xql_IfZ-7JrE4QzWsLwzSsJ6hgW7RIXuqWmKurVLy4nuS3WaHgPj-iE6CTn07aCoC0qN7frdQEmvuQBB27_puacZ04gezH7Pb3UxJV60vs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+</section>
+<!-- Main Content Canvas -->
+<main class="relative -mt-12 px-6 space-y-8">
+<!-- Title & Price -->
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<h1 class="font-headline-lg text-headline-lg text-primary">Golden Honey Latte</h1>
+<span class="font-headline-md text-headline-md text-on-surface">$6.50</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+                A rich, velvety espresso base swirled with locally sourced organic honey and topped with a delicate cinnamon-infused microfoam.
+            </p>
+</div>
+<!-- Toggle Hot/Iced -->
+<div class="flex bg-surface-container rounded-full p-1 w-fit border border-outline-variant">
+<button class="px-6 py-2 rounded-full font-label-lg text-label-lg bg-primary-container text-on-primary-container shadow-lg transition-all">Hot</button>
+<button class="px-6 py-2 rounded-full font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors">Iced</button>
+</div>
+<!-- Selection Groups (Bento-ish Grid) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Size Selection -->
+<div class="space-y-4">
+<h3 class="font-label-lg text-label-lg uppercase tracking-widest text-secondary">Select Size</h3>
+<div class="flex gap-4">
+<button class="flex-1 py-4 border border-primary-container bg-surface-container-high rounded-xl flex flex-col items-center gap-1 group active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="coffee">coffee</span>
+<span class="font-label-md text-label-md text-on-surface">Small</span>
+</button>
+<button class="flex-1 py-4 border border-outline-variant hover:border-primary transition-colors bg-surface-container rounded-xl flex flex-col items-center gap-1 group active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary" data-icon="coffee">coffee</span>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface">Medium</span>
+</button>
+<button class="flex-1 py-4 border border-outline-variant hover:border-primary transition-colors bg-surface-container rounded-xl flex flex-col items-center gap-1 group active:scale-95 duration-200">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary" data-icon="coffee">coffee</span>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface">Large</span>
+</button>
+</div>
+</div>
+<!-- Milk Type -->
+<div class="space-y-4">
+<h3 class="font-label-lg text-label-lg uppercase tracking-widest text-secondary">Milk Selection</h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-lg bg-surface-container-highest border border-outline-variant font-label-md text-label-md text-on-surface">Whole Milk</button>
+<button class="px-4 py-2 rounded-lg bg-primary-container border border-primary-container font-label-md text-label-md text-on-primary-container shadow-sm">Oat Milk</button>
+<button class="px-4 py-2 rounded-lg bg-surface-container-highest border border-outline-variant font-label-md text-label-md text-on-surface">Almond Milk</button>
+</div>
+</div>
+<!-- Sugar Level -->
+<div class="space-y-4 md:col-span-2">
+<div class="flex justify-between items-center">
+<h3 class="font-label-lg text-label-lg uppercase tracking-widest text-secondary">Sugar Level</h3>
+<span class="font-label-md text-label-md text-primary">50% (Standard)</span>
+</div>
+<div class="relative w-full h-12 flex items-center px-2 bg-surface-container rounded-xl">
+<div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-1/2 rounded-full"></div>
+</div>
+<div class="absolute left-1/2 -translate-x-1/2 w-6 h-6 bg-primary-fixed rounded-full shadow-[0_0_15px_rgba(233,195,73,0.5)] border-2 border-surface-container"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>None</span>
+<span>Sweet</span>
+</div>
+</div>
+</div>
+<!-- Add-ons / Preferences (Minimalist list) -->
+<div class="space-y-4 pt-4">
+<h3 class="font-label-lg text-label-lg uppercase tracking-widest text-secondary">Extra Rituals</h3>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="add_circle">add_circle</span>
+<span class="font-body-md text-body-md">Extra Espresso Shot</span>
+</div>
+<span class="font-label-lg text-label-lg text-primary-fixed-dim">+$1.50</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="add_circle">add_circle</span>
+<span class="font-body-md text-body-md">Whipped Cream</span>
+</div>
+<span class="font-label-lg text-label-lg text-primary-fixed-dim">+$0.50</span>
+</div>
+</div>
+</div>
+<!-- Bottom spacing for sticky button -->
+<div class="h-16"></div>
+</main>
+<!-- Sticky Bottom CTA -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-background via-background/90 to-transparent z-40">
+<div class="max-w-screen-xl mx-auto flex gap-4 items-center">
+<div class="flex items-center bg-surface-container-high rounded-xl h-14 px-2 border border-outline-variant">
+<button class="p-2 text-primary"><span class="material-symbols-outlined" data-icon="remove">remove</span></button>
+<span class="px-4 font-headline-md text-headline-md">1</span>
+<button class="p-2 text-primary"><span class="material-symbols-outlined" data-icon="add">add</span></button>
+</div>
+<button class="flex-1 h-14 bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-xl shadow-[0_10px_30px_rgba(212,175,55,0.3)] hover:bg-primary transition-all active:scale-95 duration-300">
+                Add to Cart — $6.50
+            </button>
+</div>
+</div>
+</body></html>
