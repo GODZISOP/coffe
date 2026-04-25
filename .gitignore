@@ -6,5 +6,6 @@ build/
 .expo/
 *.log
 # Exclude other apps if they are not requested
-coffe-app/
-frontend-app/
+# Include all app folders
+# coffe-app/
+# frontend-app/
