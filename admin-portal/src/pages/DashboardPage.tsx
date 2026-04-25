@@ -1,10 +1,24 @@
 import React from 'react';
-import { TrendingUp, ShoppingBag, Clock } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Clock, HelpCircle } from 'lucide-react';
 import { StatCard } from '../components/dashboard/StatCard';
 
-export const DashboardPage = ({ stats }: any) => {
+export const DashboardPage = ({ stats, onNavigate }: any) => {
   return (
     <div className="space-y-10">
+      <div className="flex justify-between items-end">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Performance Overview</h2>
+          <p className="text-[#8b7355] mt-1">Real-time statistics for your shop.</p>
+        </div>
+        <button 
+          onClick={() => onNavigate('help')}
+          className="flex items-center gap-2 bg-[#d4a373]/10 hover:bg-[#d4a373]/20 text-[#d4a373] px-4 py-2 rounded-lg border border-[#d4a373]/20 transition-all group"
+        >
+          <HelpCircle size={18} className="group-hover:rotate-12 transition-transform" />
+          <span className="text-sm font-medium">Need Help?</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard title="Revenue" value={`$${stats?.revenue?.toFixed(2) || '0.00'}`} icon={<TrendingUp className="text-[#4caf50]" />} />
         <StatCard title="Total Orders" value={stats?.count || 0} icon={<ShoppingBag className="text-[#d4a373]" />} />
