@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const StatCard = ({ title, value, icon }: any) => {
   return (
