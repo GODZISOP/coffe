@@ -55,13 +55,22 @@ export function useOrders(activeTab: string, user: any) {
     );
 
     try {
-      const response = await fetch(`http://localhost:3001/api/orders/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
+      let backendFailed = false;
+      try {
+        const response = await fetch(`http://localhost:3001/api/orders/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if (!response.ok) {
+          backendFailed = true;
+        }
+      } catch (networkError) {
+        // Fetch throws if server is unreachable
+        backendFailed = true;
+      }
 
-      if (!response.ok) {
+      if (backendFailed) {
         const { error } = await supabase.from('orders').update({ status }).eq('id', id);
         if (error) throw error;
       }

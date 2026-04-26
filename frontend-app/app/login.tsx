@@ -47,7 +47,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -59,7 +59,7 @@ export default function LoginScreen() {
 
         <View style={styles.formContainer}>
           <Text style={styles.header}>{isSignUp ? 'Join the Ritual' : 'Enter the Ritual'}</Text>
-          
+
           {isSignUp && (
             <View style={styles.inputContainer}>
               <Text style={styles.label}>FULL NAME</Text>
@@ -99,8 +99,8 @@ export default function LoginScreen() {
             />
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]} 
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
             onPress={isSignUp ? signUpWithEmail : signInWithEmail}
             disabled={loading}
           >
@@ -137,11 +137,11 @@ const styles = StyleSheet.create({
   },
   brandContainer: {
     alignItems: 'center',
-    marginBottom: 60,
+    marginBottom: 70,
   },
   brandTitle: {
     fontFamily: 'Noto Serif',
-    fontSize: 48,
+    fontSize: 49,
     fontWeight: 'bold',
     color: theme.colors.primary,
     letterSpacing: 8,

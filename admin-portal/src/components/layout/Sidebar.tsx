@@ -3,6 +3,8 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Coffee,
+  HelpCircle,
+  MessageCircle,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,6 +38,18 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
           onClick={() => setActiveTab('menu')}
           icon={<Coffee size={20} />}
           label="Menu Manager"
+        />
+        <NavItem
+          active={activeTab === 'support'}
+          onClick={() => setActiveTab('support')}
+          icon={<MessageCircle size={20} />}
+          label="Customer Chat"
+        />
+        <NavItem
+          active={activeTab === 'help'}
+          onClick={() => setActiveTab('help')}
+          icon={<HelpCircle size={20} />}
+          label="Help & Support"
         />
       </nav>
 

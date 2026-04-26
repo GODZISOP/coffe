@@ -1,24 +1,34 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../src/styles/theme';
 import { IconSymbol } from '../src/components/ui/IconSymbol';
-import { useRouter } from 'expo-router';
-
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../src/services/supabase';
 import { useAuth } from '../src/context/AuthProvider';
-import { ActivityIndicator } from 'react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+
+const { width } = Dimensions.get('window');
 
 export default function OrderTrackingScreen() {
   const router = useRouter();
+  const { orderId } = useLocalSearchParams();
   const { session } = useAuth();
-  const [order, setOrder] = React.useState<any>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  // Default store location
+  const storeRegion = {
+    latitude: 24.8607,
+    longitude: 67.0011,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  };
+
+  useEffect(() => {
     if (session) {
-      fetchLatestOrder();
+      fetchOrderData();
       
-      // Subscribe to realtime updates for this user's orders
       const subscription = supabase
         .channel('order-updates')
         .on('postgres_changes', { 
@@ -27,7 +37,10 @@ export default function OrderTrackingScreen() {
           table: 'orders',
           filter: `user_id=eq.${session.user.id}` 
         }, (payload) => {
-          setOrder(payload.new);
+          // If we are tracking a specific order, only update if it matches
+          if (!orderId || payload.new.id === orderId) {
+            setOrder(payload.new);
+          }
         })
         .subscribe();
 
@@ -35,18 +48,32 @@ export default function OrderTrackingScreen() {
         supabase.removeChannel(subscription);
       };
     }
-  }, [session]);
+  }, [session, orderId]);
 
-  const fetchLatestOrder = async () => {
+  const getStatusStep = (status: string) => {
+    switch (status) {
+      case 'pending': return 1;
+      case 'preparing': return 2;
+      case 'ready': return 3;
+      case 'completed': return 4;
+      default: return 1;
+    }
+  };
+
+  const fetchOrderData = async () => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('orders')
         .select('*')
-        .eq('user_id', session?.user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .eq('user_id', session?.user.id);
+        
+      if (orderId) {
+        query = query.eq('id', orderId).single();
+      } else {
+        query = query.order('created_at', { ascending: false }).limit(1).single();
+      }
+
+      const { data } = await query;
       
       if (data) setOrder(data);
     } catch (error) {
@@ -58,387 +85,347 @@ export default function OrderTrackingScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator color={theme.colors.primary} size="large" />
       </View>
     );
   }
 
   if (!order) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 40 }]}>
-        <Text style={[styles.headerTitle, { textAlign: 'center' }]}>No Active Rituals</Text>
-        <TouchableOpacity onPress={() => router.push('/(tabs)')} style={{ marginTop: 20 }}>
-          <Text style={styles.actionText}>START A NEW RITUAL</Text>
+      <View style={[styles.container, styles.center]}>
+        <IconSymbol name="cup.and.saucer.fill" size={64} color={theme.colors.outline} />
+        <Text style={styles.noOrderTitle}>No Ritual in Progress</Text>
+        <TouchableOpacity style={styles.shopButton} onPress={() => router.push('/(tabs)')}>
+          <Text style={styles.shopButtonText}>START A RITUAL</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  const getStatusStep = () => {
-    switch (order.status) {
-      case 'pending': return 1;
-      case 'preparing': return 2;
-      case 'ready': return 3;
-      case 'completed': return 3;
-      default: return 1;
-    }
-  };
-
-  const currentStep = getStatusStep();
-
+  const currentStep = getStatusStep(order.status);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      {/* Header Navigation */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-          <IconSymbol name="chevron.left" size={24} color={theme.colors.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>BREW</Text>
-        <View style={styles.avatarContainer}>
-          <Image 
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCyMxhMUVJDvpvcI0f4kWG00I6VwQhm52R7E3Yz-EdiAFehJmRdKWcFP4xw8r8wF1hdvXoNFw6wjM0glKIGkOvmDBbdAA5iYAgVNFimgJ85v2pC3q39E1PuMvnCG0iqvLmI5odUcBL2oNYE9OofYGDce7NSAL6dhhmzWGKxcvkhl4kmHeAxVFcldf6DYTDhj6LYogtjl5qzlY1HTqfCoQ4Hx2X445JX3g1YJMoFbFOWo4VvTJZRY7HIk5jpfVDG12mZilnxcxvdSKI' }}
-            style={styles.avatar}
-          />
-        </View>
-      </View>
-
-      {/* Hero Status Section */}
-      <View style={styles.statusSection}>
-        <Text style={styles.orderNumber}>CURRENT ORDER #{order.id.slice(0, 8).toUpperCase()}</Text>
-        <View style={styles.timeContainer}>
-          <Text style={styles.timeTitle}>
-            {order.status === 'pending' ? 'Queued' : 
-             order.status === 'preparing' ? '8 Minutes' : 
-             order.status === 'ready' ? 'READY' : 'COLLECTED'}
-          </Text>
-          <Text style={styles.timeSubtitle}>
-            {order.status === 'ready' ? 'Grab your brew at the counter' : 'Estimated until collection'}
-          </Text>
-        </View>
-      </View>
-
-
-      {/* Progress Stepper */}
-      <View style={styles.stepperCard}>
-        <View style={styles.verticalLine}></View>
-        <View style={[styles.verticalLineActive, { height: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%' }]}></View>
-
-        {/* Step 1 */}
-        <View style={styles.stepRow}>
-          <View style={currentStep >= 1 ? styles.stepIconCompleted : styles.stepIconUpcoming}>
-            <IconSymbol name="star.fill" size={20} color={currentStep >= 1 ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} />
-          </View>
-          <View style={styles.stepTextContainer}>
-            <Text style={[styles.stepTitle, currentStep >= 1 && { color: theme.colors.primary }]}>Order Placed</Text>
-            <Text style={styles.stepSubtitle}>{new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-          </View>
-        </View>
-
-        {/* Step 2 */}
-        <View style={styles.stepRow}>
-          <View style={currentStep >= 2 ? styles.stepIconCompleted : currentStep === 1 ? styles.stepIconActive : styles.stepIconUpcoming}>
-            <IconSymbol name="star.fill" size={20} color={currentStep >= 2 ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} />
-          </View>
-          <View style={[styles.stepTextContainer, currentStep < 1 && { opacity: 0.5 }]}>
-            <Text style={[styles.stepTitle, currentStep === 2 && { color: theme.colors.primary }]}>Being Prepared</Text>
-            <Text style={styles.stepSubtitle}>Your barista is crafting your brew</Text>
-          </View>
-        </View>
-
-        {/* Step 3 */}
-        <View style={[styles.stepRow, { marginBottom: 0 }]}>
-          <View style={currentStep >= 3 ? styles.stepIconCompleted : styles.stepIconUpcoming}>
-            <IconSymbol name="star.fill" size={20} color={currentStep >= 3 ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} />
-          </View>
-          <View style={[styles.stepTextContainer, currentStep < 3 && { opacity: 0.5 }]}>
-            <Text style={[styles.stepTitle, currentStep === 3 && { color: theme.colors.primary }]}>Ready for Pickup</Text>
-            <Text style={styles.stepSubtitle}>Await the final ping</Text>
-          </View>
-        </View>
-      </View>
-
-
-      {/* Map Preview Section */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Store Location</Text>
-          <TouchableOpacity>
-            <Text style={styles.actionText}>GET DIRECTIONS</Text>
+    <View style={styles.container}>
+      {/* Map Section */}
+      <View style={styles.mapContainer}>
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          initialRegion={storeRegion}
+          customMapStyle={mapStyle}
+        >
+          <Marker
+            coordinate={{ latitude: storeRegion.latitude, longitude: storeRegion.longitude }}
+            title="BREW Central"
+            description="Your ritual is being crafted here"
+          >
+            <View style={styles.markerContainer}>
+              <IconSymbol name="cup.and.saucer.fill" size={20} color="white" />
+            </View>
+          </Marker>
+        </MapView>
+        
+        <View style={styles.mapOverlay}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <IconSymbol name="chevron.left" size={24} color="white" />
           </TouchableOpacity>
         </View>
-        <View style={styles.mapContainer}>
-          <Image 
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCtEE68c95JmDIH1ttzvepQUiygRFACL8ekfuqVty4NS5sbRDMu6v2dCgYxsqb9glpl2p1vwCx3sifYlVgunTRhmv-mJMaPTxsYCVwLOIpbNil1jYmNzjKSBPD0zVXXN6k52Wqd19AiatL1EoPM9SllV0IDfPn_RSWXIhKuqPgIKAx7wPhqvKRITeZC5QNUDKvXqq991b_KO0s2BUTrukxafLDgxHNBKFbVuyp8aRFJpqMjCi1EGFVrRuSm86G6kVAhj5Ftw2R96Q4' }}
-            style={styles.mapImage}
-          />
-          <View style={styles.mapPinContainer}>
-            <IconSymbol name="star.fill" size={40} color={theme.colors.primary} />
-          </View>
-          <View style={styles.storeInfoOverlay}>
-            <View style={styles.storeIconContainer}>
-              <IconSymbol name="star.fill" size={24} color={theme.colors.primary} />
-            </View>
-            <View>
-              <Text style={styles.storeName}>BREW Central Square</Text>
-              <Text style={styles.storeAddress}>42 Barista Ave, Downtown Metro</Text>
-            </View>
-          </View>
-        </View>
       </View>
 
-      {/* Order Summary Brief */}
-      <View style={styles.summaryCard}>
-        <View style={styles.summaryContent}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.summaryTitle}>Order Details</Text>
-            {order.items?.map((item: any, idx: number) => (
-              <View key={idx} style={{ marginTop: 4 }}>
-                <Text style={styles.summaryItem}>{item.quantity}x {item.name}</Text>
-                <Text style={styles.summaryOptions}>{item.options}</Text>
+      <ScrollView style={styles.detailsContainer} contentContainerStyle={styles.scrollContent}>
+        <Animated.View entering={FadeInUp} style={styles.statusHeader}>
+          <View>
+            <Text style={styles.orderLabel}>Order #{order.id.slice(0, 4).toUpperCase()}</Text>
+            <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
+          </View>
+          <View style={styles.timeBadge}>
+            <Text style={styles.timeText}>12 min</Text>
+          </View>
+        </Animated.View>
+
+        <View style={styles.timeline}>
+          {[
+            { title: 'Order Received', sub: 'The ritual has begun', icon: 'checkmark.circle.fill' },
+            { title: 'Preparing', sub: 'Artisan crafting in progress', icon: 'flame.fill' },
+            { title: 'Ready', sub: 'Your brew awaits its master', icon: 'cup.and.saucer.fill' }
+          ].map((step, idx) => (
+            <Animated.View 
+              entering={FadeInDown.delay(idx * 100)} 
+              key={idx} 
+              style={[styles.stepItem, currentStep < idx + 1 && styles.stepDimmed]}
+            >
+              <View style={styles.stepIconContainer}>
+                <View style={[styles.stepLine, idx === 0 && { top: '50%' }, idx === 2 && { height: '50%' }]} />
+                <View style={[styles.stepDot, currentStep >= idx + 1 && styles.stepDotActive]}>
+                  <IconSymbol name={step.icon as any} size={14} color={currentStep >= idx + 1 ? "white" : "rgba(255,255,255,0.2)"} />
+                </View>
               </View>
-            ))}
-          </View>
-          <Text style={styles.summaryPrice}>${order.total_amount.toFixed(2)}</Text>
+              <View style={styles.stepContent}>
+                <Text style={[styles.stepTitle, currentStep >= idx + 1 && styles.stepTitleActive]}>{step.title}</Text>
+                <Text style={styles.stepSub}>{step.sub}</Text>
+              </View>
+            </Animated.View>
+          ))}
         </View>
-      </View>
 
-    </ScrollView>
+        <View style={styles.itemSection}>
+          <Text style={styles.sectionLabel}>YOUR SELECTION</Text>
+          {order.items.map((item: any, idx: number) => {
+            const itemImg = item.image || item.image_url;
+            const imageUrl = itemImg?.startsWith('http') 
+              ? itemImg 
+              : itemImg 
+                ? supabase.storage.from('product_images').getPublicUrl(itemImg).data.publicUrl 
+                : undefined;
+            return (
+              <Animated.View entering={FadeInUp.delay(idx * 50)} key={idx} style={styles.itemRow}>
+                <Image source={{ uri: imageUrl }} style={styles.itemImage} />
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemName}>{item.quantity}x {item.name}</Text>
+                  <Text style={styles.itemOptions}>{item.options || 'Standard Brew'}</Text>
+                </View>
+                <Text style={styles.itemPrice}>${(item.price || 5.5).toFixed(2)}</Text>
+              </Animated.View>
+            );
+          })}
+        </View>
+
+        <TouchableOpacity style={styles.helpButton}>
+          <Text style={styles.helpButtonText}>Need assistance with your ritual?</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 }
+
+const mapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [{ "color": "#212121" }]
+  },
+  {
+    "elementType": "labels.icon",
+    "stylers": [{ "visibility": "off" }]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [{ "color": "#757575" }]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [{ "color": "#212121" }]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry",
+    "stylers": [{ "color": "#757575" }]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [{ "color": "#000000" }]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry.fill",
+    "stylers": [{ "color": "#2c2c2c" }]
+  }
+];
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: 60,
-    paddingBottom: theme.spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  iconButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    color: theme.colors.primary,
-    ...theme.typography.headlineMd,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-  avatarContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-  },
-  statusSection: {
-    alignItems: 'center',
-    paddingVertical: theme.spacing.xl,
-  },
-  orderNumber: {
-    color: theme.colors.secondary,
-    ...theme.typography.labelLg,
-    letterSpacing: 2,
-  },
-  timeContainer: {
-    alignItems: 'center',
-    marginTop: theme.spacing.md,
-  },
-  timeTitle: {
-    color: theme.colors.primary,
-    ...theme.typography.headlineXl,
-  },
-  timeSubtitle: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.bodyLg,
-    marginTop: 4,
-  },
-  stepperCard: {
-    backgroundColor: theme.colors.surfaceContainerLow,
-    marginHorizontal: theme.spacing.md,
-    borderRadius: theme.rounded.md,
-    padding: theme.spacing.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  verticalLine: {
-    position: 'absolute',
-    left: 43,
-    top: 40,
-    bottom: 40,
-    width: 2,
-    backgroundColor: theme.colors.secondaryContainer,
-  },
-  verticalLineActive: {
-    position: 'absolute',
-    left: 43,
-    top: 40,
-    height: '50%',
-    width: 2,
-    backgroundColor: theme.colors.primary,
-  },
-  stepRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-    zIndex: 2,
-  },
-  stepIconCompleted: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepIconActive: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: theme.colors.primaryContainer,
-  },
-  stepIconUpcoming: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.surfaceContainerHigh,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.outline,
-  },
-  stepTextContainer: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-  },
-  stepTitle: {
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyLg,
-    fontWeight: 'bold',
-  },
-  stepSubtitle: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.bodySm,
-    marginTop: 2,
-  },
-  section: {
-    marginTop: theme.spacing.xl,
-    paddingHorizontal: theme.spacing.md,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.sm,
-  },
-  sectionTitle: {
-    color: theme.colors.onSurface,
-    ...theme.typography.headlineMd,
-  },
-  actionText: {
-    color: theme.colors.primary,
-    ...theme.typography.labelLg,
+    backgroundColor: '#161311',
   },
   mapContainer: {
-    height: 250,
-    borderRadius: theme.rounded.md,
-    overflow: 'hidden',
-    position: 'relative',
+    height: 350,
+    width: '100%',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  mapOverlay: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  markerContainer: {
+    padding: 8,
+    backgroundColor: '#D4AF37',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  detailsContainer: {
+    flex: 1,
+    backgroundColor: '#161311',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30,
+  },
+  scrollContent: {
+    padding: 24,
+    paddingBottom: 40,
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  orderLabel: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    letterSpacing: 2,
+  },
+  statusText: {
+    color: '#D4AF37',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+  timeBadge: {
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.2)',
+  },
+  timeText: {
+    color: '#D4AF37',
+    fontWeight: 'bold',
+  },
+  timeline: {
+    marginBottom: 32,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    height: 70,
+  },
+  stepDimmed: {
+    opacity: 0.3,
+  },
+  stepIconContainer: {
+    width: 40,
+    alignItems: 'center',
+  },
+  stepLine: {
+    width: 2,
+    height: '100%',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    position: 'absolute',
+  },
+  stepDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#231f1d',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
-  mapImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+  stepDotActive: {
+    backgroundColor: '#D4AF37',
+    borderColor: '#D4AF37',
   },
-  mapPinContainer: {
-    position: 'absolute',
-    top: '40%',
-    left: '50%',
-    marginLeft: -20,
-    marginTop: -20,
+  stepContent: {
+    marginLeft: 16,
+    flex: 1,
   },
-  storeInfoOverlay: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(22, 19, 17, 0.9)',
-    padding: theme.spacing.sm,
-    borderRadius: theme.rounded.sm,
+  stepTitle: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  stepTitleActive: {
+    color: 'white',
+  },
+  stepSub: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  itemSection: {
+    backgroundColor: '#1e1b19',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+  },
+  sectionLabel: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 10,
+    letterSpacing: 2,
+    marginBottom: 16,
+  },
+  itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    marginBottom: 16,
   },
-  storeIconContainer: {
+  itemImage: {
     width: 48,
     height: 48,
-    borderRadius: 8,
-    backgroundColor: theme.colors.surfaceContainerHigh,
+    borderRadius: 12,
+  },
+  itemInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  itemName: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  itemOptions: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  itemPrice: {
+    color: '#D4AF37',
+    fontWeight: 'bold',
+  },
+  helpButton: {
     alignItems: 'center',
+    marginTop: 10,
+  },
+  helpButtonText: {
+    color: '#D4AF37',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  center: {
     justifyContent: 'center',
-    marginRight: theme.spacing.sm,
+    alignItems: 'center',
+    padding: 40,
   },
-  storeName: {
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyMd,
+  noOrderTitle: {
+    color: 'white',
+    fontSize: 20,
     fontWeight: 'bold',
+    marginTop: 20,
   },
-  storeAddress: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.labelSm,
-    marginTop: 2,
+  shopButton: {
+    backgroundColor: '#D4AF37',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 30,
+    marginTop: 30,
   },
-  summaryCard: {
-    marginTop: theme.spacing.xl,
-    marginHorizontal: theme.spacing.md,
-    backgroundColor: theme.colors.surfaceContainer,
-    borderRadius: theme.rounded.md,
-    padding: theme.spacing.md,
-    borderLeftWidth: 4,
-    borderLeftColor: theme.colors.primary,
-  },
-  summaryContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  summaryTitle: {
-    color: theme.colors.primary,
-    ...theme.typography.labelLg,
+  shopButtonText: {
+    color: '#161311',
     fontWeight: 'bold',
-  },
-  summaryItem: {
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyMd,
-    marginTop: 4,
-  },
-  summaryOptions: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.bodySm,
-    marginTop: 2,
-  },
-  summaryPrice: {
-    color: theme.colors.onSurface,
-    ...theme.typography.headlineMd,
   },
 });

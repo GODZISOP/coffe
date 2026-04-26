@@ -31,7 +31,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const addToCart = useCallback((item: CartItem) => {
-    setItems((prev) => [...prev, item]);
+    setItems((prev) => {
+      const existing = prev.findIndex(i => i.id === item.id && i.options === item.options);
+      if (existing !== -1) {
+        const newItems = [...prev];
+        newItems[existing] = {
+          ...newItems[existing],
+          quantity: newItems[existing].quantity + item.quantity
+        };
+        return newItems;
+      }
+      return [...prev, item];
+    });
   }, []);
 
   const removeFromCart = useCallback((id: string) => {

@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from '../src/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../src/context/AuthProvider';
 import { CartProvider } from '../src/context/CartProvider';
+import AppLoader from '../src/components/AppLoader';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -32,6 +33,10 @@ function RootLayoutNav() {
     }
   }, [session, loading, segments]);
 
+  if (loading) {
+    return <AppLoader />;
+  }
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
@@ -39,6 +44,7 @@ function RootLayoutNav() {
         <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
         <Stack.Screen name="drink" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="tracking" options={{ headerShown: false }} />
+        <Stack.Screen name="ai-assistant" options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />

@@ -1,66 +1,211 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, RefreshControl } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { theme } from '../../src/styles/theme';
 import { supabase } from '../../src/services/supabase';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../src/context/AuthProvider';
+import { IconSymbol } from '../../src/components/ui/IconSymbol';
+import Skeleton from '../../src/components/ui/Skeleton';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { session } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeOrder, setActiveOrder] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true);
+      fetchProducts();
+      if (session) {
+        fetchActiveOrder();
+      } else {
+        setLoading(false);
+      }
+    }, [session])
+  );
+
+  async function fetchActiveOrder() {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', session?.user.id)
+        .in('status', ['pending', 'preparing', 'ready'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (data) setActiveOrder(data);
+    } catch (err) {
+      // Ignore if no active order
+    }
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchProducts(), fetchActiveOrder()]);
+    setRefreshing(false);
+  };
 
   async function fetchProducts() {
     try {
       setLoading(true);
       const { data, error } = await supabase.from('products').select('*');
       if (error) throw error;
+
+      const fallbackFeatured = [
+        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', title: 'Gold Leaf Latte', image: 'https://images.unsplash.com/photo-1570968015861-d55f41bc1a74?w=800' },
+        { id: '5b223f6d-0b4f-4e77-817a-9a4e65ec1100', title: 'Aged Barrel Cold Brew', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
+        { id: 'mocha-001', title: 'Midnight Mocha', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800' }
+      ];
+      const fallbackAll = [
+        { id: '1dd4dc46-87b8-403b-ae9f-731c84ae5cca', name: 'Velvet Flat White', desc: 'House Silk Blend', price: '$6.25', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
+        { id: '8e0eca5e-d530-4c52-91c6-188b30846b24', name: 'Obsidian Iced Latte', desc: 'Charcoal Infused', price: '$7.00', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
+        { id: 'matcha-001', name: 'Silk Road Matcha', desc: 'Ceremonial Grade', price: '$8.25', image: 'https://images.unsplash.com/photo-1515823662273-0b78821aa7ff?w=800' },
+        { id: 'food-001', name: 'Artisan Croissant', desc: 'Buttery & Flaky', price: '$4.50', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800' },
+        { id: 'food-002', name: 'Blueberry Ritual Muffin', desc: 'Fresh Berries', price: '$3.75', image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800' },
+        { id: 'tea-001', name: 'Saffron Infused Tea', desc: 'Premium Blend', price: '$6.00', image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800' },
+      ];
+
+      const dbProducts = data || [];
       
-      if (data) {
-        setFeaturedProducts(data.filter(p => p.is_featured));
-        setAllProducts(data);
-      }
+      const uniqueFeatured = [...dbProducts.filter(p => p.is_featured), ...fallbackFeatured.filter(f => !dbProducts.some(p => p.id === f.id))];
+      const uniqueAll = [...dbProducts, ...fallbackAll.filter(f => !dbProducts.some(p => p.id === f.id))];
+
+      setFeaturedProducts(uniqueFeatured.slice(0, 5));
+      setAllProducts(uniqueAll);
     } catch (error: any) {
       console.error('Error fetching products:', error);
-      setError(`${error.message || 'Network request failed'} (${process.env.EXPO_PUBLIC_SUPABASE_URL || 'URL Missing'})`);
-      // Fallback to static data if table doesn't exist yet
-      setFeaturedProducts([
-        { id: 'f1', title: 'Gold Leaf Latte', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbRqlH80YDaT0UvW-gD4fVOxqx_Mtq1-hwKSjKwNpEYe-gXdteGokBNwXYwGnQYlMqysnLqWBS5TwiyQg7QOjsFKu69oaniXp19don7mANNxPA6wCeFQh7dCaQM4ZCgG8LaITsmgLn_t8Z6IpdGe4g-s-4pAyPBcMBAPMLXik21pfit1WcxM6HDq5Jx6ZSWYKtll3OljCFrZFjzWtfMjSZ3CzgD49LzUzyLP3B9Vs5HEUYLpHjq1SJ9lj3d_JYVFKwf-CrJXGgXGY' },
-        { id: 'f2', title: 'Aged Barrel Cold Brew', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAhRdTKfUdNKHb6cK8wJivcMJPj0tkwG9TOVRIM02Q4GyqyImGSrhJvBpsa4PSt5y8mt5Sfn5YtYstFtf9pNNDLs2WwkGLlgpukzBXcmyrDhojHmFDHRgMQZxEZ1lrtZhL3ThmAwTI3lF0FCkgDJucdkBmselakoKtv9c2LAUwDL9xDoG7aQBsecSc1N0LUolODd9uw6Fzi5-Xfw_znmntRpVY53N7Uned2vA0pMg-T9kvBHgla-xcH81ZcQihghiVcK3oVThNNe5M' }
-      ]);
-      setAllProducts([
-        { id: 'a1', name: 'Velvet Flat White', desc: 'House Silk Blend', price: '$6.25', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDf8AAVylwx2GU6LAnF4Ns3eGM1CN1UZlDdSIsYWiohIYFbX5InejGVeooo_tQpY4X6QaZ9hpo-WNBipPtPSBp-noJAqKGmHD7WM-eT0bS1oIbMPCggvUrcYqva0FO7ClKgVifZbudrnoKWYA0aFk3c6nHtZdPK9tvJLvseTbikckm0xa_jPzb6glnjO4Bhelv60bZq3hyW_hf97tmqIiVqmwZo9cqCHtK_RbPvuPL2ixxJP7PRv_8gb8rPhQuBc3lzwKZOY24Ertg' },
-        { id: 'a2', name: 'Obsidian Iced Latte', desc: 'Charcoal Infused', price: '$7.00', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsJPZx0UVpwVSMN9QFRAXrfd6vceuHjVnGAU29paeho3L6MOkz5R3kbyk37aBR5-wZet8cFAmknqVEUNCXxt7-V5DlhkXhCs1pnf4n6nIpUz_PHiU8a6dOoj8tEz3IxRHDgPaesQF1O2VfQ3dBnQfoOlFfx4W9fPNlrD_AcaNzg52x0O55cq_RwXb7HDo_hq5ny9OaIyPAKSwaua799wTJL0PkDrkqS3pXPvAGFnL86eKVKLa-T_dBEN566uzzUuwXKOUdJe8UhUI' },
-      ]);
+      setError(`${error.message || 'Network request failed'}`);
     } finally {
       setLoading(false);
     }
   }
 
+
+  if (loading && !refreshing) {
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerTitleContainer}>
+            <Skeleton width={120} height={32} />
+            <Skeleton width={200} height={24} style={{ marginTop: 8 }} />
+          </View>
+          <Skeleton width={48} height={48} borderRadius={24} />
+        </View>
+
+        <View style={{ padding: theme.spacing.md }}>
+          <Skeleton height={80} borderRadius={theme.rounded.lg} />
+        </View>
+
+        <View style={styles.featuredContainer}>
+          <Text style={styles.sectionTitle}>FEATURED RITUALS</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featuredScroll}>
+            {[1, 2, 3].map((_, i) => (
+              <View key={i} style={[styles.card, { backgroundColor: 'transparent' }]}>
+                <Skeleton height={200} width={200} borderRadius={theme.rounded.lg} />
+                <Skeleton height={20} width={150} style={{ marginTop: 10, marginLeft: 5 }} />
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.curatedSection}>
+          <Text style={styles.sectionTitle}>CURATED SELECTION</Text>
+          <View style={{ paddingHorizontal: theme.spacing.md }}>
+            {[1, 2, 3, 4].map((_, i) => (
+              <View key={i} style={styles.skeletonListItem}>
+                <Skeleton width={60} height={60} borderRadius={theme.rounded.sm} />
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Skeleton width="80%" height={18} />
+                  <Skeleton width="60%" height={14} style={{ marginTop: 8 }} />
+                  <Skeleton width="30%" height={18} style={{ marginTop: 8 }} />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      refreshControl={
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={onRefresh} 
+          tintColor={theme.colors.primary}
+          colors={[theme.colors.primary]}
+        />
+      }
+    >
       <View style={styles.header}>
         <View style={styles.headerTitleContainer}>
           <Text style={styles.title}>BREW</Text>
-          <Text style={styles.subtitle}>Good Morning, Alex</Text>
+          <Text style={styles.subtitle}>Good Morning, {session?.user.email?.split('@')[0] || 'Artisan'}</Text>
         </View>
-        <Image 
-          source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAX70ovQG_KVPs2Fv6_OiIAMmEdvqGUgPZt6sEdlDsqdSKy85jkItmmScRwTDIgES16vyVuD3lyk7dmMF2SXCZ40GgKa90ctMYjLH7hYGWusRPUUYGKpNM768ecqxDNMPfpZOsjAf9YkmUb3ucK7rjNNj9qsOsbpby4p95z21mIsamJB_QiYjnvA8fFV4rlzAq2Tyedip_Nuj-YosLGyYUdibdG25k0RuzUMhQC7AggvC-jzjjeKdyVECCKypbG-l1uVn8zDWKFtDI' }} 
-          style={styles.avatar} 
-        />
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            onPress={() => router.push('/support')}
+            style={styles.headerIconButton}
+          >
+            <IconSymbol name="bubble.left.and.bubble.right.fill" size={24} color={theme.colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => router.push('/ai-assistant')}
+            style={styles.headerIconButton}
+          >
+            <IconSymbol name="sparkles" size={24} color={theme.colors.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/profile')}>
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100' }} 
+              style={styles.avatar} 
+            />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {activeOrder && (
+        <TouchableOpacity 
+          style={styles.activeOrderBanner}
+          onPress={() => router.push('/tracking')}
+        >
+          <View style={styles.activeOrderIcon}>
+             <IconSymbol name="bolt.fill" size={24} color={theme.colors.onPrimary} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.activeOrderTitle}>Active Ritual Progress</Text>
+            <Text style={styles.activeOrderSubtitle}>Status: {activeOrder.status.toUpperCase()}</Text>
+          </View>
+          <IconSymbol name="chevron.right" size={20} color={theme.colors.onPrimary} />
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity 
+        style={styles.aiBanner} 
+        onPress={() => router.push('/ai-assistant')}
+      >
+        <View style={styles.aiBannerContent}>
+          <Text style={styles.aiBannerTitle}>Order with AI</Text>
+          <Text style={styles.aiBannerSubtitle}>English & Urdu supported</Text>
+        </View>
+        <View style={styles.aiIconContainer}>
+          <Text style={{ fontSize: 24 }}>☕</Text>
+        </View>
+      </TouchableOpacity>
 
       <View style={styles.featuredContainer}>
         <Text style={styles.sectionTitle}>FEATURED RITUALS</Text>
-        {loading ? (
-          <ActivityIndicator color={theme.colors.primary} />
-        ) : error ? (
+        {error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>Network connectivity limited. Rituals are restricted.</Text>
             <TouchableOpacity onPress={fetchProducts} style={styles.retryBtn}>
@@ -81,20 +226,16 @@ export default function HomeScreen() {
 
       <View style={styles.curatedSection}>
         <Text style={styles.sectionTitle}>CURATED SELECTION</Text>
-        {loading ? (
-          <ActivityIndicator color={theme.colors.primary} />
-        ) : (
-          allProducts.map((item, index) => (
-            <TouchableOpacity key={item.id || index} style={styles.listItem} onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}>
-              <Image source={{ uri: item.image || item.image_url }} style={styles.listImagePlaceholder} />
-              <View style={styles.listItemContent}>
-                <Text style={styles.listItemTitle}>{item.name}</Text>
-                <Text style={styles.listItemDesc}>{item.desc || item.description}</Text>
-                <Text style={styles.listItemPrice}>{item.price}</Text>
-              </View>
-            </TouchableOpacity>
-          ))
-        )}
+        {allProducts.map((item, index) => (
+          <TouchableOpacity key={item.id || index} style={styles.listItem} onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}>
+            <Image source={{ uri: item.image || item.image_url }} style={styles.listImagePlaceholder} />
+            <View style={styles.listItemContent}>
+              <Text style={styles.listItemTitle}>{item.name}</Text>
+              <Text style={styles.listItemDesc}>{item.desc || item.description}</Text>
+              <Text style={styles.listItemPrice}>{item.price}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
     </ScrollView>
   );
@@ -110,6 +251,66 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.xl,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  activeOrderBanner: {
+    marginHorizontal: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.secondary,
+    borderRadius: theme.rounded.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  activeOrderIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeOrderTitle: {
+    color: theme.colors.onPrimary,
+    ...theme.typography.labelLg,
+    fontWeight: 'bold',
+  },
+  activeOrderSubtitle: {
+    color: theme.colors.onPrimary,
+    ...theme.typography.bodySm,
+    opacity: 0.9,
+  },
+  aiBanner: {
+    margin: theme.spacing.md,
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.rounded.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  aiBannerContent: {
+    flex: 1,
+  },
+  aiBannerTitle: {
+    color: 'white',
+    ...theme.typography.headlineMd,
+  },
+  aiBannerSubtitle: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    ...theme.typography.bodySm,
+  },
+  aiIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitleContainer: {
@@ -131,7 +332,7 @@ const styles = StyleSheet.create({
     ...theme.typography.headlineLg,
     marginTop: theme.spacing.xs,
   },
-  section: {
+  featuredContainer: {
     marginTop: theme.spacing.md,
   },
   sectionTitle: {
@@ -140,7 +341,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     marginBottom: theme.spacing.sm,
   },
-  horizontalScroll: {
+  featuredScroll: {
     paddingLeft: theme.spacing.md,
   },
   card: {
@@ -158,6 +359,9 @@ const styles = StyleSheet.create({
     color: theme.colors.onBackground,
     ...theme.typography.bodyMd,
     padding: theme.spacing.sm,
+  },
+  curatedSection: {
+    marginTop: theme.spacing.lg,
   },
   listItem: {
     flexDirection: 'row',
@@ -215,5 +419,12 @@ const styles = StyleSheet.create({
   retryText: {
     color: theme.colors.primary,
     ...theme.typography.labelLg,
+  },
+  skeletonListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.surfaceContainer,
   },
 });

@@ -5,12 +5,13 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { OrdersPage } from './pages/OrdersPage';
 import { HelpPage } from './pages/HelpPage';
+import { SupportPage } from './pages/SupportPage';
 import { useAuth } from './hooks/useAuth';
 import { useOrders } from './hooks/useOrders';
 import { Loader } from './components/ui/Loader';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'help'>('orders');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'menu' | 'support' | 'help'>('orders');
   const { user, loading: authLoading, login, logout } = useAuth();
   const { orders, stats, loading, fetchData, updateStatus } = useOrders(activeTab, user);
 
@@ -51,6 +52,7 @@ export default function App() {
                   Menu Manager Coming Soon...
                 </div>
               )}
+              {activeTab === 'support' && <SupportPage />}
               {activeTab === 'help' && <HelpPage />}
             </>
           )}

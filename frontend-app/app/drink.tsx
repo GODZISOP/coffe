@@ -6,6 +6,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useCart } from '../src/context/CartProvider';
 import { supabase } from '../src/services/supabase';
 
+import Skeleton from '../src/components/ui/Skeleton';
+
 export default function DrinkDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -59,8 +61,26 @@ export default function DrinkDetailScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.mainContainer, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+      <View style={styles.mainContainer}>
+        <Skeleton height={400} width="100%" />
+        <View style={styles.content}>
+          <View style={styles.titleRow}>
+            <Skeleton width="60%" height={32} />
+            <Skeleton width="20%" height={32} />
+          </View>
+          <Skeleton width="100%" height={16} style={{ marginTop: 12 }} />
+          <Skeleton width="90%" height={16} style={{ marginTop: 8 }} />
+          <Skeleton width={180} height={40} borderRadius={20} style={{ marginTop: 24 }} />
+          
+          <View style={{ marginTop: 30 }}>
+            <Skeleton width={100} height={20} />
+            <View style={[styles.row, { marginTop: 12 }]}>
+              <Skeleton flex={1} height={80} borderRadius={12} />
+              <Skeleton flex={1} height={80} borderRadius={12} />
+              <Skeleton flex={1} height={80} borderRadius={12} />
+            </View>
+          </View>
+        </View>
       </View>
     );
   }

@@ -1,28 +1,59 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  Image, 
+  TouchableOpacity, 
+  Alert,
+  Dimensions,
+  RefreshControl
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { theme } from '../../src/styles/theme';
 import { IconSymbol } from '../../src/components/ui/IconSymbol';
 import { supabase } from '../../src/services/supabase';
 import { useAuth } from '../../src/context/AuthProvider';
+import Skeleton from '../../src/components/ui/Skeleton';
+import { useFocusEffect } from 'expo-router';
+
+const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { session, signOut } = useAuth();
-  const [profile, setProfile] = React.useState<any>(null);
-  const [orders, setOrders] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [profile, setProfile] = useState<any>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ur'>('en');
 
-  React.useEffect(() => {
-    if (session) {
-      fetchProfileAndOrders();
-    }
-  }, [session]);
+  // Stats calculation
+  const totalSpent = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
+  const ordersThisMonth = orders.filter(o => {
+    const orderDate = new Date(o.created_at);
+    const now = new Date();
+    return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+  }).length;
 
-  const fetchProfileAndOrders = async () => {
+  useFocusEffect(
+    React.useCallback(() => {
+      if (session) {
+        fetchData();
+      } else {
+        setLoading(false);
+      }
+    }, [session])
+  );
+
+  const fetchData = async () => {
     try {
-      setLoading(true);
+      setLoading(!refreshing);
       
-      // Fetch Profile
-      const { data: profileData, error: profileError } = await supabase
+      // 1. Fetch Profile
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', session?.user.id)
@@ -30,164 +61,300 @@ export default function ProfileScreen() {
       
       if (profileData) setProfile(profileData);
 
-      // Fetch Recent Orders
-      const { data: orderData, error: orderError } = await supabase
+      // 2. Fetch Recent Orders
+      const { data: orderData } = await supabase
         .from('orders')
         .select('*')
         .eq('user_id', session?.user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
+        .order('created_at', { ascending: false });
       
       if (orderData) setOrders(orderData);
+
+      // 3. Fetch Favorites (Simplified mock or join)
+      // For now, let's just get the count
+      const { count: favCount } = await supabase
+        .from('favorites')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session?.user.id);
+      
+      setFavorites(Array(favCount || 0).fill({}));
+
     } catch (error) {
       console.error('Error fetching profile data:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error: any) {
-      Alert.alert("Error signing out", error.message);
-    }
+    Alert.alert("Sign Out", "Are you sure you want to leave the ritual?", [
+      { text: "Stay", style: "cancel" },
+      { text: "Sign Out", style: "destructive", onPress: async () => {
+        try {
+          await signOut();
+          router.replace('/login');
+        } catch (error: any) {
+          Alert.alert("Error", error.message);
+        }
+      }}
+    ]);
   };
 
+  if (loading && !refreshing) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.headerSkeleton}>
+          <Skeleton width={80} height={80} borderRadius={40} />
+          <Skeleton width={150} height={24} style={{ marginTop: 12 }} />
+          <Skeleton width={200} height={16} style={{ marginTop: 8 }} />
+        </View>
+        <View style={{ padding: 20 }}>
+          <Skeleton height={100} borderRadius={16} />
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
+            <Skeleton flex={1} height={80} borderRadius={12} />
+            <Skeleton flex={1} height={80} borderRadius={12} />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.identityContainer}>
-          <View>
-            <Text style={styles.userName}>{profile?.full_name || session?.user.email?.split('@')[0] || 'Artisan'}</Text>
-            <Text style={styles.memberStatus}>
-              {profile?.updated_at 
-                ? `Member since ${new Date(profile.updated_at).getFullYear()}` 
-                : 'Ritual member since 2024'}
+    <ScrollView 
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
+    >
+      {/* Identity Section */}
+      <View style={styles.identitySection}>
+        <TouchableOpacity 
+          style={styles.identityHeader} 
+          onPress={() => router.push('/edit-profile')}
+        >
+          <Image 
+            source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200' }}
+            style={styles.avatar}
+          />
+          <View style={styles.identityText}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName}>{profile?.full_name || 'Artisan'}</Text>
+              <View style={styles.tierBadge}>
+                <Text style={styles.tierText}>{profile?.tier || 'Bronze'}</Text>
+              </View>
+            </View>
+            <Text style={styles.handle}>@{profile?.username || session?.user.email?.split('@')[0]}</Text>
+            <Text style={styles.tagline} numberOfLines={1}>
+              {profile?.tagline || 'Crafting the perfect daily ritual...'}
             </Text>
           </View>
+          <IconSymbol name="chevron.right" size={20} color={theme.colors.onSurfaceVariant} />
+        </TouchableOpacity>
+      </View>
 
-          <Image 
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD4nqF7veH1-w8GVhyLWtfESKCga6lWSsoPs9zoBGO7N__4SZz3C_-cOO2fuBfoY-APBhFr4nN7dut4SWQf0nlPl0TQQUH2LjqPsbyVKZQsyEhpRJXJePAbPW79OUqo2WXEEs1r44amtsXpuHa1VSuxssAc_5Pl6eJg_MJBbnkHP0tiACu2zb6mvIPCrGWnDRchzytrn74LlZCaQmLJ5vlvEp5d8s1SFbTUlhLM1aHYzSBVfVwelXrrPvEp36gqkzXKXK-hecBXQEI' }}
-            style={styles.avatar}
+      {/* Stats Section (Horizontal Cards) */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>TOTAL SPENT</Text>
+          <Text style={styles.statValue}>${totalSpent.toFixed(2)}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>MONTHLY ORDERS</Text>
+          <Text style={styles.statValue}>{ordersThisMonth}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>FAVORITES</Text>
+          <Text style={styles.statValue}>{favorites.length}</Text>
+        </View>
+      </View>
+
+      {/* Main Content Sections */}
+      <View style={styles.content}>
+        
+        {/* Concierge Section */}
+        <SectionHeader title="CONCIERGE" />
+        <View style={styles.card}>
+          <MenuItem 
+            icon="sparkles" 
+            title="AI Coffee Assistant" 
+            subtitle="Your personal ritual guide"
+            onPress={() => router.push('/ai-assistant')}
+          />
+          <MenuItem 
+            icon="bubble.left.and.bubble.right.fill" 
+            title="Customer Support" 
+            subtitle="Chat with a coffee expert"
+            onPress={() => router.push('/support')}
+            isLast
           />
         </View>
 
-        {/* Loyalty Card */}
-        <View style={styles.loyaltyCard}>
-          <View style={styles.loyaltyTop}>
-            <View>
-              <Text style={styles.brewPointsLabel}>BREW POINTS</Text>
-              <Text style={styles.brewPointsValue}>1,240</Text>
-            </View>
-            <IconSymbol name="star.fill" size={32} color={theme.colors.onPrimary} />
-          </View>
-          <View style={styles.loyaltyBottom}>
-            <Text style={styles.nextRewardText}>Next reward at 1,500 pts</Text>
-            <View style={styles.tierBadge}>
-              <Text style={styles.tierText}>Gold Tier</Text>
-            </View>
-          </View>
+        {/* Saved Things */}
+        <SectionHeader title="SAVED RITUALS" />
+        <View style={styles.card}>
+          <MenuItem 
+            icon="heart.fill" 
+            title="Favorite Drinks" 
+            subtitle={`${favorites.length} items saved`}
+            onPress={() => Alert.alert('Coming Soon', 'Your favorite brew list is being curated.')}
+          />
+          <MenuItem 
+            icon="house.fill" 
+            title="Saved Addresses" 
+            subtitle="Home, Work"
+            onPress={() => router.push('/addresses')}
+          />
+          <MenuItem 
+            icon="creditcard.fill" 
+            title="Payment Methods" 
+            subtitle="Visa •••• 4429"
+            onPress={() => Alert.alert('Coming Soon', 'Secure ritual vault is launching soon.')}
+            isLast
+          />
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>MY RITUAL</Text>
-        <View style={styles.preferencesGrid}>
-          <View style={styles.preferenceCard}>
-            <IconSymbol name="house.fill" size={24} color={theme.colors.primary} />
-            <View style={styles.preferenceTextContainer}>
-              <Text style={styles.preferenceLabel}>DEFAULT MILK</Text>
-              <Text style={styles.preferenceValue}>Oat Milk</Text>
-            </View>
-          </View>
-          <View style={styles.preferenceCard}>
-            <IconSymbol name="house.fill" size={24} color={theme.colors.primary} />
-            <View style={styles.preferenceTextContainer}>
-              <Text style={styles.preferenceLabel}>SUGAR LEVEL</Text>
-              <Text style={styles.preferenceValue}>Normal</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>RECENT ORDERS</Text>
-          {orders.length > 0 && (
-            <TouchableOpacity><Text style={styles.viewAllText}>View All</Text></TouchableOpacity>
-          )}
-        </View>
-        
+        {/* Recent Orders */}
+        <SectionHeader 
+          title="ORDER HISTORY" 
+          action="View All" 
+          onAction={() => router.push('/orders')} 
+        />
         {orders.length === 0 ? (
-          <View style={styles.emptyOrdersContainer}>
-            <Text style={styles.emptyOrdersText}>No rituals recorded yet.</Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyText}>No rituals recorded yet.</Text>
           </View>
         ) : (
-          orders.map((order) => (
-            <View key={order.id} style={styles.orderCard}>
-              <View style={styles.orderIconPlaceholder}>
-                <IconSymbol name="bolt.fill" size={24} color={theme.colors.primary} />
-              </View>
-              <View style={styles.orderDetails}>
-                <Text style={styles.orderName}>Ritual #{order.id.slice(0, 8)}</Text>
-                <Text style={styles.orderMeta}>
-                  {new Date(order.created_at).toLocaleDateString()} • ${order.total_amount.toFixed(2)}
-                </Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: order.status === 'completed' ? '#4caf50' : theme.colors.primary }]}>
-                <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
-              </View>
-            </View>
-          ))
+          orders.slice(0, 3).map((order, idx) => {
+            const orderDate = new Date(order.created_at);
+            const formattedDate = orderDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            const formattedTime = orderDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            
+            const firstItem = order.items?.[0];
+            const itemImg = firstItem?.image || firstItem?.image_url;
+            const imageUrl = itemImg?.startsWith('http')
+              ? itemImg
+              : itemImg 
+                ? supabase.storage.from('product_images').getPublicUrl(itemImg).data.publicUrl 
+                : null;
+
+            return (
+              <TouchableOpacity 
+                key={order.id} 
+                style={[styles.orderItem, idx === 2 && { borderBottomWidth: 0 }]}
+                onPress={() => router.push({ pathname: '/tracking', params: { orderId: order.id } })}
+              >
+                {imageUrl ? (
+                  <Image source={{ uri: imageUrl }} style={styles.orderImage} />
+                ) : (
+                  <View style={styles.orderIcon}>
+                    <Text style={{ fontSize: 20 }}>☕</Text>
+                  </View>
+                )}
+                <View style={styles.orderDetails}>
+                  <Text style={styles.orderTitle}>Ritual #{order.id.slice(0, 6).toUpperCase()}</Text>
+                  <Text style={styles.orderMeta}>{formattedDate} • {formattedTime}</Text>
+                  <Text style={{ color: theme.colors.primary, fontSize: 12, marginTop: 2, fontWeight: '500' }}>
+                    ${order.total_amount.toFixed(2)}
+                  </Text>
+                </View>
+                <TouchableOpacity 
+                  style={styles.reorderBtn}
+                  onPress={() => router.push({ pathname: '/tracking', params: { orderId: order.id } })}
+                >
+                  <Text style={styles.reorderText}>TRACK</Text>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            );
+          })
         )}
-      </View>
 
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>PAYMENT METHODS</Text>
-        <View style={styles.listContainer}>
-          <TouchableOpacity style={styles.listItem}>
-            <IconSymbol name="person.fill" size={24} color={theme.colors.onSurfaceVariant} />
-            <View style={styles.listTextContainer}>
-              <Text style={styles.listTitle}>•••• 4429</Text>
-              <Text style={styles.listSubtitle}>Primary • Expires 08/26</Text>
-            </View>
-            <IconSymbol name="star.fill" size={24} color={theme.colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.listItem, { borderBottomWidth: 0 }]}>
-            <IconSymbol name="person.fill" size={24} color={theme.colors.onSurfaceVariant} />
-            <View style={styles.listTextContainer}>
-              <Text style={styles.listTitle}>Apple Pay</Text>
-            </View>
-            <IconSymbol name="chevron.right" size={20} color={theme.colors.onSurfaceVariant} />
-          </TouchableOpacity>
+        {/* Settings & Preferences */}
+        <SectionHeader title="PREFERENCES" />
+        <View style={styles.card}>
+          <PreferenceRow 
+            label="Dietary" 
+            value={profile?.dietary_preference || 'None'} 
+            onPress={() => router.push('/edit-profile')}
+          />
+          <PreferenceRow 
+            label="Default Size" 
+            value={profile?.default_cup_size || 'Medium'} 
+            onPress={() => router.push('/edit-profile')}
+          />
+          <PreferenceRow 
+            label="Language" 
+            value={language === 'en' ? 'English' : 'Urdu (Roman)'} 
+            onPress={() => setLanguage(l => l === 'en' ? 'ur' : 'en')}
+          />
+          <PreferenceRow 
+            label="Notifications" 
+            value="Enabled" 
+            onPress={() => Alert.alert('Settings', 'Notification preferences updated.')}
+            isLast
+          />
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>SETTINGS</Text>
-        <TouchableOpacity style={styles.settingRow}>
-          <IconSymbol name="house.fill" size={24} color={theme.colors.onSurfaceVariant} />
-          <Text style={styles.settingText}>Notification Settings</Text>
-          <IconSymbol name="chevron.right" size={20} color={theme.colors.onSurfaceVariant} />
+        {/* Footer Actions */}
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <IconSymbol name="person.fill" size={20} color="#ffb4ab" />
+          <Text style={styles.signOutButtonText}>Sign Out of Ritual</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingRow}>
-          <IconSymbol name="house.fill" size={24} color={theme.colors.onSurfaceVariant} />
-          <Text style={styles.settingText}>Privacy & Security</Text>
-          <IconSymbol name="chevron.right" size={20} color={theme.colors.onSurfaceVariant} />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.settingRow, { marginTop: theme.spacing.sm }]}
-          onPress={handleSignOut}
-        >
-          <IconSymbol name="person.fill" size={24} color="#ffb4ab" />
-          <Text style={[styles.settingText, { color: '#ffb4ab' }]}>Sign Out</Text>
-        </TouchableOpacity>
+        
+        <Text style={styles.versionText}>BREW Version 2.4.0 (Artisan Edition)</Text>
       </View>
-      <View style={{ height: 40 }} />
+      <View style={{ height: 100 }} />
     </ScrollView>
+  );
+}
+
+// Sub-components
+function SectionHeader({ title, action, onAction }: any) {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {action && (
+        <TouchableOpacity onPress={onAction}>
+          <Text style={styles.sectionAction}>{action}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+function MenuItem({ icon, title, subtitle, onPress, isLast }: any) {
+  return (
+    <TouchableOpacity 
+      style={[styles.menuItem, isLast && { borderBottomWidth: 0 }]} 
+      onPress={onPress}
+    >
+      <View style={styles.menuIconContainer}>
+        <IconSymbol name={icon} size={20} color={theme.colors.primary} />
+      </View>
+      <View style={styles.menuTextContainer}>
+        <Text style={styles.menuTitle}>{title}</Text>
+        <Text style={styles.menuSubtitle}>{subtitle}</Text>
+      </View>
+      <IconSymbol name="chevron.right" size={16} color={theme.colors.onSurfaceVariant} />
+    </TouchableOpacity>
+  );
+}
+
+function PreferenceRow({ label, value, onPress, isLast }: any) {
+  return (
+    <TouchableOpacity 
+      style={[styles.prefRow, isLast && { borderBottomWidth: 0 }]} 
+      onPress={onPress}
+    >
+      <Text style={styles.prefLabel}>{label}</Text>
+      <View style={styles.prefValueContainer}>
+        <Text style={styles.prefValue}>{value}</Text>
+        <IconSymbol name="chevron.right" size={14} color={theme.colors.onSurfaceVariant} />
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -196,224 +363,252 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    padding: theme.spacing.md,
-    paddingTop: theme.spacing.xl,
-  },
-  identityContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  headerSkeleton: {
+    paddingTop: 80,
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    paddingBottom: 20,
   },
-  userName: {
-    color: theme.colors.onSurface,
-    ...theme.typography.headlineMd,
+  identitySection: {
+    paddingTop: 60,
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: 20,
   },
-  memberStatus: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.labelMd,
-    marginTop: 4,
+  identityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surfaceContainer,
+    padding: theme.spacing.md,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
   },
-  loyaltyCard: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.rounded.lg,
-    padding: theme.spacing.md,
-    height: 140,
-    justifyContent: 'space-between',
+  identityText: {
+    flex: 1,
+    marginLeft: 16,
   },
-  loyaltyTop: {
+  nameRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    gap: 8,
   },
-  brewPointsLabel: {
-    color: theme.colors.onPrimary,
-    ...theme.typography.labelSm,
-    opacity: 0.8,
-  },
-  brewPointsValue: {
-    color: theme.colors.onPrimary,
-    ...theme.typography.headlineLg,
-    marginTop: 4,
-  },
-  loyaltyBottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  nextRewardText: {
-    color: theme.colors.onPrimary,
-    ...theme.typography.labelMd,
-    opacity: 0.9,
+  userName: {
+    color: theme.colors.onBackground,
+    ...theme.typography.titleLarge,
+    fontWeight: 'bold',
   },
   tierBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   tierText: {
-    color: theme.colors.onPrimary,
-    ...theme.typography.labelSm,
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
-  section: {
+  handle: {
+    color: theme.colors.primary,
+    ...theme.typography.labelMedium,
+    marginTop: 2,
+  },
+  tagline: {
+    color: theme.colors.onSurfaceVariant,
+    ...theme.typography.bodySmall,
+    marginTop: 4,
+  },
+  statsContainer: {
+    flexDirection: 'row',
     paddingHorizontal: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
+    gap: 12,
+    marginBottom: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: theme.colors.surfaceContainerLow,
+    padding: 12,
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.03)',
+  },
+  statLabel: {
+    color: theme.colors.onSurfaceVariant,
+    fontSize: 8,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  statValue: {
+    color: theme.colors.onBackground,
+    ...theme.typography.titleLarge,
+    marginTop: 4,
+    fontWeight: 'bold',
+  },
+  content: {
+    paddingHorizontal: theme.spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginTop: 20,
+    marginBottom: 12,
+    paddingHorizontal: 4,
   },
   sectionTitle: {
     color: theme.colors.secondary,
-    ...theme.typography.labelLg,
-    marginBottom: theme.spacing.sm,
+    ...theme.typography.labelLarge,
+    letterSpacing: 1,
   },
-  viewAllText: {
+  sectionAction: {
     color: theme.colors.primary,
-    ...theme.typography.labelMd,
+    ...theme.typography.labelMedium,
   },
-  preferencesGrid: {
-    flexDirection: 'row',
-    gap: theme.spacing.sm,
-  },
-  preferenceCard: {
-    flex: 1,
-    backgroundColor: theme.colors.surfaceContainerLow,
+  card: {
+    backgroundColor: theme.colors.surfaceContainer,
+    borderRadius: 20,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: theme.rounded.md,
-    padding: theme.spacing.md,
-    gap: theme.spacing.sm,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  preferenceTextContainer: {
-    marginTop: theme.spacing.xs,
-  },
-  preferenceLabel: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.labelSm,
-  },
-  preferenceValue: {
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyLg,
-  },
-  orderCard: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(35, 31, 29, 0.5)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: theme.rounded.md,
-    padding: theme.spacing.sm,
-    marginBottom: theme.spacing.sm,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
-  orderIconPlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: theme.rounded.sm,
-    backgroundColor: theme.colors.surfaceVariant,
+  menuIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: theme.colors.surfaceContainerHigh,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  emptyOrdersContainer: {
-    padding: theme.spacing.lg,
+  menuTextContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  menuTitle: {
+    color: theme.colors.onBackground,
+    ...theme.typography.bodyLarge,
+    fontWeight: '600',
+  },
+  menuSubtitle: {
+    color: theme.colors.onSurfaceVariant,
+    ...theme.typography.bodySmall,
+  },
+  orderItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderRadius: theme.rounded.md,
+    backgroundColor: theme.colors.surfaceContainer,
+    padding: 12,
+    borderRadius: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.03)',
   },
-  emptyOrdersText: {
-    color: theme.colors.outline,
-    ...theme.typography.bodyMd,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  statusText: {
-    color: theme.colors.onPrimary,
-    fontSize: 10,
-    fontWeight: 'bold',
+  orderIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: theme.colors.surfaceContainerHigh,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   orderImage: {
-
-    width: 60,
-    height: 60,
-    borderRadius: theme.rounded.sm,
-    backgroundColor: theme.colors.surfaceVariant,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: theme.colors.surfaceContainerHigh,
   },
   orderDetails: {
     flex: 1,
-    marginLeft: theme.spacing.sm,
+    marginLeft: 12,
   },
-  orderName: {
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyMd,
-    fontWeight: '600',
+  orderTitle: {
+    color: theme.colors.onBackground,
+    ...theme.typography.bodyMedium,
+    fontWeight: 'bold',
   },
   orderMeta: {
     color: theme.colors.onSurfaceVariant,
-    ...theme.typography.labelSm,
-    marginTop: 4,
-  },
-  reorderButton: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: theme.rounded.sm,
-  },
-  reorderText: {
-    color: theme.colors.onPrimary,
-    ...theme.typography.labelMd,
-    fontWeight: 'bold',
-  },
-  listContainer: {
-    backgroundColor: theme.colors.surfaceContainer,
-    borderRadius: theme.rounded.md,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  listTextContainer: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-  },
-  listTitle: {
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyMd,
-  },
-  listSubtitle: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.labelSm,
+    ...theme.typography.bodySmall,
     marginTop: 2,
   },
-  settingRow: {
+  reorderBtn: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  reorderText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  emptyCard: {
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: theme.colors.surfaceContainer,
+    borderRadius: 16,
+  },
+  emptyText: {
+    color: theme.colors.onSurfaceVariant,
+    ...theme.typography.bodyMedium,
+  },
+  prefRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  prefLabel: {
+    color: theme.colors.onBackground,
+    ...theme.typography.bodyMedium,
+  },
+  prefValueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.surfaceContainerLow,
-    borderRadius: theme.rounded.md,
-    marginBottom: theme.spacing.xs,
+    gap: 8,
   },
-  settingText: {
-    flex: 1,
-    marginLeft: theme.spacing.md,
-    color: theme.colors.onSurface,
-    ...theme.typography.bodyMd,
+  prefValue: {
+    color: theme.colors.primary,
+    ...theme.typography.bodyMedium,
+  },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 40,
+    gap: 12,
+    padding: 16,
+    backgroundColor: 'rgba(255, 180, 171, 0.05)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 180, 171, 0.2)',
+  },
+  signOutButtonText: {
+    color: '#ffb4ab',
+    ...theme.typography.labelLarge,
+    fontWeight: 'bold',
+  },
+  versionText: {
+    color: theme.colors.onSurfaceVariant,
+    fontSize: 10,
+    textAlign: 'center',
+    marginTop: 20,
+    opacity: 0.5,
   },
 });
