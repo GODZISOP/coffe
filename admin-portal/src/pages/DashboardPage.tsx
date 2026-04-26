@@ -1,4 +1,3 @@
-import React from 'react';
 import { TrendingUp, ShoppingBag, Clock, HelpCircle } from 'lucide-react';
 import { StatCard } from '../components/dashboard/StatCard';
 

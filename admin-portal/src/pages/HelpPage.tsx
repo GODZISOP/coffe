@@ -1,5 +1,4 @@
-import React from 'react';
-import { HelpCircle, Mail, MessageSquare, Phone } from 'lucide-react';
+import { HelpCircle, Mail, MessageSquare } from 'lucide-react';
 
 export const HelpPage = () => {
   return (
