@@ -24,7 +24,7 @@ export const SupportPage = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
-  const [loading, setLoading] = useState(true);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export const SupportPage = () => {
     } catch (err) {
       console.error('Error fetching chat users:', err);
     } finally {
-      setLoading(false);
+
     }
   };
 
