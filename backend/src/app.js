@@ -12,6 +12,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'Ritual Backend Online', timestamp: new Date() });
 });
 
+// Root Route for Vercel
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
+
 // Routes
 app.use('/api/orders', orderRoutes);
 

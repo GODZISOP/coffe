@@ -22,13 +22,13 @@ function RootLayoutNav() {
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(auth)' || segments[0] === 'login';
+    const inAuthGroup = segments[0] === '(auth)' || segments[0] === 'login' || segments[0] === 'get-started';
 
     if (!session && !inAuthGroup) {
-      // Redirect to the login page.
-      router.replace('/login');
+      // Redirect to the get started page.
+      router.replace('/get-started');
     } else if (session && inAuthGroup) {
-      // Redirect away from the login page.
+      // Redirect away from the auth pages.
       router.replace('/(tabs)');
     }
   }, [session, loading, segments]);
@@ -41,7 +41,8 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="get-started" options={{ headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="login" options={{ headerShown: false, animation: 'slide_from_right' }} />
         <Stack.Screen name="drink" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="tracking" options={{ headerShown: false }} />
         <Stack.Screen name="ai-assistant" options={{ headerShown: false, presentation: 'modal' }} />
