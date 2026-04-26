@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { theme } from '../../src/styles/theme';
 import { IconSymbol } from '../../src/components/ui/IconSymbol';
@@ -140,7 +141,13 @@ export default function CartScreen() {
           ) : (
             items.map((item) => (
               <View key={item.id} style={styles.cartItem}>
-                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                <Image 
+                  source={{ uri: item.image }} 
+                  style={styles.itemImage}
+                  transition={200}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                />
                 <View style={styles.itemDetails}>
                   <Text style={styles.itemName}>{item.name}</Text>
                   <Text style={styles.itemDesc}>{item.options}</Text>
@@ -270,6 +277,8 @@ function AddressPickerModal({ addresses, selectedId, onSelect, onClose, onAddNew
                 <Image 
                   source={{ uri: 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&q=80&w=100' }} 
                   style={styles.staticMap}
+                  transition={200}
+                  contentFit="cover"
                 />
                 <View style={styles.modalAddressTextContainer}>
                   <Text style={styles.modalAddressLabel}>{addr.label}</Text>

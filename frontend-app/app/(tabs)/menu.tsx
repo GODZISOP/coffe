@@ -5,12 +5,12 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Image,
   TextInput,
   ActivityIndicator,
   Dimensions,
   Alert
 } from 'react-native';
+import { Image } from 'expo-image';
 import { theme } from '../../src/styles/theme';
 import { supabase } from '../../src/services/supabase';
 import { useCart } from '../../src/context/CartProvider';
@@ -93,7 +93,13 @@ export default function MenuScreen() {
 
   const renderProductItem = ({ item }: { item: any }) => (
     <View style={styles.productCard}>
-      <Image source={{ uri: item.image || item.image_url }} style={styles.productImage} />
+      <Image 
+        source={{ uri: item.image || item.image_url }} 
+        style={styles.productImage}
+        transition={300}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+      />
       <View style={styles.productInfo}>
         <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
         <Text style={styles.productDesc} numberOfLines={1}>{item.description}</Text>

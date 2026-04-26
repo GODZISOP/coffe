@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../src/styles/theme';
@@ -7,6 +8,7 @@ import { IconSymbol } from '../src/components/ui/IconSymbol';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { supabase } from '../src/services/supabase';
 import { useAuth } from '../src/context/AuthProvider';
+import Skeleton from '../src/components/ui/Skeleton';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
@@ -86,8 +88,47 @@ export default function OrderTrackingScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator color={theme.colors.primary} size="large" />
+      <View style={styles.container}>
+        <Skeleton height={350} width="100%" />
+        <View style={styles.detailsContainer}>
+          <View style={styles.scrollContent}>
+            <View style={styles.statusHeader}>
+              <View>
+                <Skeleton width={100} height={16} />
+                <Skeleton width={150} height={32} style={{ marginTop: 8 }} />
+              </View>
+              <Skeleton width={80} height={40} borderRadius={12} />
+            </View>
+            
+            <View style={styles.timeline}>
+              {[1, 2, 3].map((_, i) => (
+                <View key={i} style={styles.stepItem}>
+                  <View style={styles.stepIconContainer}>
+                    <Skeleton width={28} height={28} borderRadius={14} />
+                  </View>
+                  <View style={styles.stepContent}>
+                    <Skeleton width={120} height={20} />
+                    <Skeleton width={180} height={14} style={{ marginTop: 6 }} />
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            <View style={styles.itemSection}>
+              <Skeleton width={100} height={12} style={{ marginBottom: 16 }} />
+              {[1, 2].map((_, i) => (
+                <View key={i} style={styles.itemRow}>
+                  <Skeleton width={48} height={48} borderRadius={12} />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Skeleton width="60%" height={16} />
+                    <Skeleton width="40%" height={12} style={{ marginTop: 6 }} />
+                  </View>
+                  <Skeleton width={40} height={20} />
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
       </View>
     );
   }
@@ -182,6 +223,9 @@ export default function OrderTrackingScreen() {
                 <Image 
                   source={{ uri: imageUrl || 'https://images.unsplash.com/photo-1510970174660-c19504271b3f?w=200' }} 
                   style={styles.itemImage} 
+                  transition={200}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
                 />
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>{item.quantity}x {item.name}</Text>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { theme } from '../../src/styles/theme';
 import { supabase } from '../../src/services/supabase';
@@ -179,6 +180,7 @@ export default function HomeScreen() {
             <Image
               source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100' }}
               style={styles.avatar}
+              transition={200}
             />
           </TouchableOpacity>
         </View>
@@ -226,7 +228,13 @@ export default function HomeScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featuredScroll}>
             {featuredProducts.map((item, index) => (
               <TouchableOpacity key={item.id || index} style={styles.card} onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}>
-                <Image source={{ uri: item.image || item.image_url }} style={styles.cardImagePlaceholder} />
+                <Image 
+                  source={{ uri: item.image || item.image_url }} 
+                  style={styles.cardImagePlaceholder}
+                  transition={300}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                />
                 <Text style={styles.cardTitle}>{item.title || item.name}</Text>
               </TouchableOpacity>
             ))}
@@ -238,7 +246,13 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>CURATED SELECTION</Text>
         {allProducts.map((item, index) => (
           <TouchableOpacity key={item.id || index} style={styles.listItem} onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}>
-            <Image source={{ uri: item.image || item.image_url }} style={styles.listImagePlaceholder} />
+            <Image 
+              source={{ uri: item.image || item.image_url }} 
+              style={styles.listImagePlaceholder}
+              transition={300}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
             <View style={styles.listItemContent}>
               <Text style={styles.listItemTitle}>{item.name}</Text>
               <Text style={styles.listItemDesc}>{item.desc || item.description}</Text>

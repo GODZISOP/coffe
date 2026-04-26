@@ -10,7 +10,7 @@
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://iargkczdofmoepyucmez.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhcmdrY3pkb2Ztb2VweXVjbWV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMzQ1MzcsImV4cCI6MjA5MjYxMDUzN30.MmLwmUrBCDQ2mCNUR1SCgG-_OvPA9gZKx0x8EJHVges",
-        "EXPO_PUBLIC_GROQ_API_KEY": ""
+        "EXPO_PUBLIC_GROQ_API_KEY": "YOUR_GROQ_API_KEY_HERE"
       }
     },
     "production": {

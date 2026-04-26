@@ -6,6 +6,7 @@ import { IconSymbol } from '../src/components/ui/IconSymbol';
 import { supabase } from '../src/services/supabase';
 import { useAuth } from '../src/context/AuthProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Skeleton from '../src/components/ui/Skeleton';
 
 export default function OrdersScreen() {
   const router = useRouter();
@@ -85,8 +86,18 @@ export default function OrdersScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+        <View style={styles.listContent}>
+          {[1, 2, 3, 4, 5].map((_, i) => (
+            <View key={i} style={styles.orderCard}>
+              <Skeleton width={50} height={50} borderRadius={theme.rounded.sm} />
+              <View style={[styles.orderDetails, { gap: 8 }]}>
+                <Skeleton width="70%" height={20} />
+                <Skeleton width="40%" height={12} />
+                <Skeleton width="50%" height={14} />
+              </View>
+              <Skeleton width={60} height={20} borderRadius={4} />
+            </View>
+          ))}
         </View>
       ) : orders.length === 0 ? (
         <View style={styles.center}>

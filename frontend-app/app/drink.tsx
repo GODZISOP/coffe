@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
 import { theme } from '../src/styles/theme';
 import { IconSymbol } from '../src/components/ui/IconSymbol';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -138,6 +139,9 @@ export default function DrinkDetailScreen() {
           <Image
             source={{ uri: product.image_url || product.image }}
             style={styles.heroImage}
+            transition={300}
+            contentFit="cover"
+            cachePolicy="memory-disk"
           />
         </View>
 
