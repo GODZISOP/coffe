@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { theme } from '../src/styles/theme';
 import { IconSymbol } from '../src/components/ui/IconSymbol';
@@ -110,8 +111,8 @@ export default function OrderTrackingScreen() {
       {/* Map Section */}
       <View style={styles.mapContainer}>
         <MapView
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
+          provider={Platform.OS === 'android' ? undefined : PROVIDER_GOOGLE}
+          style={StyleSheet.absoluteFillObject}
           initialRegion={storeRegion}
           customMapStyle={mapStyle}
         >
@@ -126,11 +127,9 @@ export default function OrderTrackingScreen() {
           </Marker>
         </MapView>
         
-        <View style={styles.mapOverlay}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <IconSymbol name="chevron.left" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <IconSymbol name="chevron.left" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.detailsContainer} contentContainerStyle={styles.scrollContent}>
@@ -180,7 +179,10 @@ export default function OrderTrackingScreen() {
                 : undefined;
             return (
               <Animated.View entering={FadeInUp.delay(idx * 50)} key={idx} style={styles.itemRow}>
-                <Image source={{ uri: imageUrl }} style={styles.itemImage} />
+                <Image 
+                  source={{ uri: imageUrl || 'https://images.unsplash.com/photo-1510970174660-c19504271b3f?w=200' }} 
+                  style={styles.itemImage} 
+                />
                 <View style={styles.itemInfo}>
                   <Text style={styles.itemName}>{item.quantity}x {item.name}</Text>
                   <Text style={styles.itemOptions}>{item.options || 'Standard Brew'}</Text>
@@ -257,6 +259,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 40,
+    left: 20,
+    zIndex: 999,
   },
   markerContainer: {
     padding: 8,

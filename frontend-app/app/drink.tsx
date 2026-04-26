@@ -34,8 +34,31 @@ export default function DrinkDetailScreen() {
         .eq('id', id)
         .single();
       
-      if (error) throw error;
-      setProduct(data);
+      let productData = data;
+      const signatureId = '023d4a9d-9329-463e-8e55-7aae836c3f5f';
+
+      // Fallback/Override for Signature Drink and New Items
+      if (id === signatureId) {
+        productData = {
+          ...productData,
+          id: signatureId,
+          name: 'Saffron Pistachio Latte',
+          price: 12.50,
+          description: 'A luxurious blend of premium saffron-infused milk and toasted Iranian pistachios.',
+          image: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=800'
+        };
+      } else if (!productData) {
+        const fallbacks: any = {
+          'rose-001': { name: 'Rose Petal Cappuccino', price: 8.50, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800', description: 'Silky cappuccino infused with organic rose petals and honey.' },
+          'lavender-001': { name: 'Lavender Honey Latte', price: 7.75, image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800', description: 'Sweet lavender syrup with local wild honey and espresso.' },
+          'hibiscus-001': { name: 'Iced Hibiscus Tea', price: 6.50, image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800', description: 'Refreshing cold hibiscus tea with a hint of citrus.' },
+          'turkish-001': { name: 'Turkish Delight Mocha', price: 9.00, image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800', description: 'Rich dark chocolate mocha with a touch of rose and spice.' }
+        };
+        if (fallbacks[id as string]) productData = { ...fallbacks[id as string], id };
+      }
+
+      if (!productData && error) throw error;
+      setProduct(productData);
     } catch (error) {
       console.error('Error fetching product:', error);
       Alert.alert("Error", "Could not load ritual details.");

@@ -247,8 +247,8 @@ export default function ProfileScreen() {
                 style={[styles.orderItem, idx === 2 && { borderBottomWidth: 0 }]}
                 onPress={() => router.push({ pathname: '/tracking', params: { orderId: order.id } })}
               >
-                {imageUrl ? (
-                  <Image source={{ uri: imageUrl }} style={styles.orderImage} />
+                {imageUrl || firstItem?.image || firstItem?.image_url ? (
+                  <Image source={{ uri: imageUrl || firstItem?.image || firstItem?.image_url }} style={styles.orderImage} />
                 ) : (
                   <View style={styles.orderIcon}>
                     <Text style={{ fontSize: 20 }}>☕</Text>

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
-  Image, 
-  TextInput, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  TextInput,
   ActivityIndicator,
   Dimensions,
   Alert
@@ -43,20 +43,26 @@ export default function MenuScreen() {
       setLoading(true);
       const { data, error } = await supabase.from('products').select('*');
       if (error) throw error;
-      
+
+      const blacklist = ['Gold Leaf Latte', 'Silk Road Matcha', 'matcha-001', 'gold-leaf-uuid'];
+      const dbProducts = (data || []).filter(p => !blacklist.includes(p.name) && !blacklist.includes(p.id));
+
       const fallbackData = [
-        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', name: 'Gold Leaf Latte', category: 'Specialty', price: 12.50, description: '24k gold flakes, house silk blend.', image: 'https://images.unsplash.com/photo-1570968015861-d55f41bc1a74?w=800' },
+        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', name: 'Saffron Pistachio Latte', category: 'Specialty', price: 12.50, description: 'Saffron infused milk with toasted pistachio.', image: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=800' },
         { id: '5b223f6d-0b4f-4e77-817a-9a4e65ec1100', name: 'Aged Barrel Cold Brew', category: 'Coffee', price: 8.00, description: 'Bourbon barrel aged beans.', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
         { id: '1dd4dc46-87b8-403b-ae9f-731c84ae5cca', name: 'Velvet Flat White', category: 'Coffee', price: 6.25, description: 'Smooth, creamy house blend.', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
         { id: '8e0eca5e-d530-4c52-91c6-188b30846b24', name: 'Obsidian Iced Latte', category: 'Specialty', price: 7.00, description: 'Activated charcoal latte.', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
         { id: 'mocha-001', name: 'Midnight Mocha', category: 'Coffee', price: 7.50, description: 'Dark chocolate & espresso.', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800' },
-        { id: 'matcha-001', name: 'Silk Road Matcha', category: 'Tea', price: 8.25, description: 'Ceremonial grade green tea.', image: 'https://images.unsplash.com/photo-1515823662273-0b78821aa7ff?auto=format&fit=crop&q=80&w=800' },
+        { id: 'rose-001', name: 'Rose Petal Cappuccino', category: 'Specialty', price: 8.50, description: 'Infused with organic rose water.', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
+        { id: 'lavender-001', name: 'Lavender Honey Latte', category: 'Specialty', price: 7.75, description: 'Lavender syrup and wild honey.', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
+        { id: 'vanilla-001', name: 'Smoked Vanilla Latte', category: 'Coffee', price: 8.25, description: 'Smoked vanilla bean extract.', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
+        { id: 'coconut-001', name: 'Coconut Cloud Macchiato', category: 'Coffee', price: 7.50, description: 'Creamy coconut foam.', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
+        { id: 'hibiscus-001', name: 'Iced Hibiscus Tea', category: 'Tea', price: 6.50, description: 'Refreshing floral cold tea.', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800' },
         { id: 'tea-001', name: 'Saffron Infused Tea', category: 'Tea', price: 6.00, description: 'Premium black tea with saffron.', image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800' },
         { id: 'food-001', name: 'Artisan Croissant', category: 'Bakery', price: 4.50, description: 'Buttery, flaky french pastry.', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800' },
         { id: 'food-002', name: 'Blueberry Ritual Muffin', category: 'Bakery', price: 3.75, description: 'Fresh berries & honey glaze.', image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800' },
       ];
 
-      const dbProducts = data || [];
       const combined = [...dbProducts, ...fallbackData.filter(f => !dbProducts.some(p => p.id === f.id))];
 
       setProducts(combined);
@@ -93,7 +99,7 @@ export default function MenuScreen() {
         <Text style={styles.productDesc} numberOfLines={1}>{item.description}</Text>
         <View style={styles.priceRow}>
           <Text style={styles.productPrice}>${Number(item.price).toFixed(2)}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.addButton}
             onPress={() => handleAddToCart(item)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -141,7 +147,7 @@ export default function MenuScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Menu</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.cartIcon}
           onPress={() => Alert.alert('Ritual Notifications', 'You will be notified when your artisanal brew is ready.')}
         >
@@ -151,7 +157,7 @@ export default function MenuScreen() {
 
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color={theme.colors.onSurfaceVariant} style={styles.searchIcon} />
-        <TextInput 
+        <TextInput
           style={styles.searchInput}
           placeholder="Find your ritual..."
           placeholderTextColor={theme.colors.onSurfaceVariant}
@@ -161,16 +167,16 @@ export default function MenuScreen() {
       </View>
 
       <View style={styles.categoriesWrapper}>
-        <FlatList 
+        <FlatList
           data={CATEGORIES}
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item}
           contentContainerStyle={styles.categoryList}
           renderItem={({ item }) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.categoryItem, 
+                styles.categoryItem,
                 selectedCategory === item && styles.categoryItemSelected
               ]}
               onPress={() => setSelectedCategory(item)}
@@ -186,7 +192,7 @@ export default function MenuScreen() {
         />
       </View>
 
-      <FlatList 
+      <FlatList
         data={filteredProducts}
         numColumns={2}
         keyExtractor={item => item.id}

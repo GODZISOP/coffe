@@ -40,7 +40,7 @@ export default function HomeScreen() {
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-      
+
       if (data) setActiveOrder(data);
     } catch (err) {
       // Ignore if no active order
@@ -59,24 +59,34 @@ export default function HomeScreen() {
       const { data, error } = await supabase.from('products').select('*');
       if (error) throw error;
 
+      const blacklist = ['Gold Leaf Latte', 'Silk Road Matcha', 'matcha-001', 'gold-leaf-uuid'];
+      const dbProducts = (data || []).filter(p => !blacklist.includes(p.name) && !blacklist.includes(p.id));
+
       const fallbackFeatured = [
-        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', title: 'Gold Leaf Latte', image: 'https://images.unsplash.com/photo-1570968015861-d55f41bc1a74?w=800' },
-        { id: '5b223f6d-0b4f-4e77-817a-9a4e65ec1100', title: 'Aged Barrel Cold Brew', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
-        { id: 'mocha-001', title: 'Midnight Mocha', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800' }
+        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', title: 'Saffron Pistachio Latte', image: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=800' },
+        { id: 'rose-001', title: 'Rose Petal Cappuccino', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
+        { id: 'turkish-001', title: 'Turkish Delight Mocha', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800' }
       ];
       const fallbackAll = [
-        { id: '1dd4dc46-87b8-403b-ae9f-731c84ae5cca', name: 'Velvet Flat White', desc: 'House Silk Blend', price: '$6.25', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
+        { id: '1dd4dc46-87b8-403b-ae9f-731c84ae5cca', name: 'Velvet Flat White', desc: 'House Silk Blend', price: '$6.25', image: 'https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?w=800' },
         { id: '8e0eca5e-d530-4c52-91c6-188b30846b24', name: 'Obsidian Iced Latte', desc: 'Charcoal Infused', price: '$7.00', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
-        { id: 'matcha-001', name: 'Silk Road Matcha', desc: 'Ceremonial Grade', price: '$8.25', image: 'https://images.unsplash.com/photo-1515823662273-0b78821aa7ff?w=800' },
+        { id: 'rose-001', name: 'Rose Petal Cappuccino', desc: 'Floral & Creamy', price: '$8.50', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
+        { id: 'lavender-001', name: 'Lavender Honey Latte', desc: 'Sweet Lavender', price: '$7.75', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
+        { id: 'turkish-001', name: 'Turkish Delight Mocha', desc: 'Rose & Cocoa', price: '$9.00', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800' },
+        { id: 'hibiscus-001', name: 'Iced Hibiscus Tea', desc: 'Floral Refreshment', price: '$6.50', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800' },
         { id: 'food-001', name: 'Artisan Croissant', desc: 'Buttery & Flaky', price: '$4.50', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800' },
         { id: 'food-002', name: 'Blueberry Ritual Muffin', desc: 'Fresh Berries', price: '$3.75', image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800' },
         { id: 'tea-001', name: 'Saffron Infused Tea', desc: 'Premium Blend', price: '$6.00', image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800' },
       ];
 
-      const dbProducts = data || [];
-      
-      const uniqueFeatured = [...dbProducts.filter(p => p.is_featured), ...fallbackFeatured.filter(f => !dbProducts.some(p => p.id === f.id))];
-      const uniqueAll = [...dbProducts, ...fallbackAll.filter(f => !dbProducts.some(p => p.id === f.id))];
+      const uniqueFeatured = [...dbProducts.filter(p => p.is_featured), ...fallbackFeatured.filter(f => !dbProducts.some(p => p.id === f.id))].map(p => {
+        const fb = fallbackFeatured.find(f => f.id === p.id);
+        return { ...p, image: p.image || p.image_url || fb?.image };
+      });
+      const uniqueAll = [...dbProducts, ...fallbackAll.filter(f => !dbProducts.some(p => p.id === f.id))].map(p => {
+        const fb = fallbackAll.find(f => f.id === p.id);
+        return { ...p, image: p.image || p.image_url || fb?.image };
+      });
 
       setFeaturedProducts(uniqueFeatured.slice(0, 5));
       setAllProducts(uniqueAll);
@@ -136,12 +146,12 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       refreshControl={
-        <RefreshControl 
-          refreshing={refreshing} 
-          onRefresh={onRefresh} 
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           tintColor={theme.colors.primary}
           colors={[theme.colors.primary]}
         />
@@ -153,34 +163,34 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>Good Morning, {session?.user.email?.split('@')[0] || 'Artisan'}</Text>
         </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => router.push('/support')}
             style={styles.headerIconButton}
           >
             <IconSymbol name="bubble.left.and.bubble.right.fill" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => router.push('/ai-assistant')}
             style={styles.headerIconButton}
           >
             <IconSymbol name="sparkles" size={24} color={theme.colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/(tabs)/profile')}>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100' }} 
-              style={styles.avatar} 
+            <Image
+              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100' }}
+              style={styles.avatar}
             />
           </TouchableOpacity>
         </View>
       </View>
 
       {activeOrder && (
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.activeOrderBanner}
           onPress={() => router.push('/tracking')}
         >
           <View style={styles.activeOrderIcon}>
-             <IconSymbol name="bolt.fill" size={24} color={theme.colors.onPrimary} />
+            <IconSymbol name="bolt.fill" size={24} color={theme.colors.onPrimary} />
           </View>
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.activeOrderTitle}>Active Ritual Progress</Text>
@@ -190,8 +200,8 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity 
-        style={styles.aiBanner} 
+      <TouchableOpacity
+        style={styles.aiBanner}
         onPress={() => router.push('/ai-assistant')}
       >
         <View style={styles.aiBannerContent}>

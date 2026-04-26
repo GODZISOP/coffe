@@ -1,17 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 export function useOrders(activeTab: string, user: any) {
   const [orders, setOrders] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+  }, []);
 
   useEffect(() => {
     if (user) {
       fetchData();
       const channel = supabase
         .channel('admin-updates')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+          // Play sound and show notification for new orders
+          audioRef.current?.play().catch(() => {});
+          if (Notification.permission === 'granted') {
+            new Notification('New Ritual Received!', {
+              body: `Order #${payload.new.id.slice(0, 6).toUpperCase()} is waiting for preparation.`,
+              icon: '/favicon.png'
+            });
+          } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission();
+          }
+          fetchData();
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => {
           fetchData();
         })
         .subscribe();
@@ -57,7 +75,8 @@ export function useOrders(activeTab: string, user: any) {
     try {
       let backendFailed = false;
       try {
-        const response = await fetch(`http://localhost:3001/api/orders/${id}`, {
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+        const response = await fetch(`${BACKEND_URL}/api/orders/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status })
