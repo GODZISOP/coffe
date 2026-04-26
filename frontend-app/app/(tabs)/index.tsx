@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
+import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { theme } from '../../src/styles/theme';
@@ -13,6 +14,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [categories] = useState(['All', 'Espresso', 'Latte', 'Cappuccino', 'Cold Brew']);
+  const [activeCategory, setActiveCategory] = useState('All');
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -161,7 +164,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.title}>BREW</Text>
+          <Text style={styles.brandTitle}>BREW</Text>
           <Text style={styles.subtitle}>Good Morning, {session?.user.email?.split('@')[0] || 'Artisan'}</Text>
         </View>
         <View style={styles.headerActions}>
@@ -216,8 +219,11 @@ export default function HomeScreen() {
         </View>
       </TouchableOpacity>
 
-      <View style={styles.featuredContainer}>
-        <Text style={styles.sectionTitle}>FEATURED RITUALS</Text>
+        <View style={styles.categoriesContainer}>
+          <Text style={styles.categoriesHeader}>ALL RITUALS</Text>
+        </View>
+
+        <View style={styles.featuredContainer}>
         {error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>Network connectivity limited. Rituals are restricted.</Text>
@@ -226,41 +232,95 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featuredScroll}>
-            {featuredProducts.map((item, index) => (
-              <TouchableOpacity key={item.id || index} style={styles.card} onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}>
-                <Image 
-                  source={{ uri: item.image || item.image_url }} 
-                  style={styles.cardImagePlaceholder}
-                  transition={300}
-                  contentFit="cover"
-                  cachePolicy="memory-disk"
-                />
-                <Text style={styles.cardTitle}>{item.title || item.name}</Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.featuredScroll}
+          snapToInterval={200 + theme.spacing.md}
+          decelerationRate="fast"
+        >
+          {featuredProducts.map((item, index) => (
+            <Animated.View 
+              entering={FadeInRight.delay(index * 100)} 
+              key={item.id || index}
+              style={styles.featuredCardContainer}
+            >
+              <TouchableOpacity 
+                style={styles.featuredCard} 
+                onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}
+              >
+                <View style={styles.featuredImageWrapper}>
+                  <Image 
+                    source={{ uri: item.image || item.image_url }} 
+                    style={styles.featuredCircularImage}
+                    transition={400}
+                    contentFit="cover"
+                  />
+                </View>
+                
+                <View style={styles.featuredContent}>
+                  <Text style={styles.featuredCardTitle} numberOfLines={1}>{item.title || item.name}</Text>
+                  
+                  <View style={styles.featuredInfoRow}>
+                    <View style={styles.ratingBadge}>
+                      <IconSymbol name="star.fill" size={12} color="#FFD700" />
+                      <Text style={styles.ratingText}>4.5</Text>
+                    </View>
+                    <Text style={styles.volText}>Vol. <Text style={{fontWeight: 'bold'}}>160ml</Text></Text>
+                  </View>
+
+                  <View style={styles.featuredFooter}>
+                    <View>
+                      <Text style={styles.featuredCardPrice}>{item.price || '$12.00'}</Text>
+                      <Text style={styles.superSellText}>Super Sell</Text>
+                    </View>
+                    <View style={styles.featuredAddButtonLarge}>
+                      <IconSymbol name="plus" size={24} color="black" />
+                    </View>
+                  </View>
+                </View>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            </Animated.View>
+          ))}
+        </ScrollView>
         )}
       </View>
 
       <View style={styles.curatedSection}>
-        <Text style={styles.sectionTitle}>CURATED SELECTION</Text>
-        {allProducts.map((item, index) => (
-          <TouchableOpacity key={item.id || index} style={styles.listItem} onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}>
-            <Image 
-              source={{ uri: item.image || item.image_url }} 
-              style={styles.listImagePlaceholder}
-              transition={300}
-              contentFit="cover"
-              cachePolicy="memory-disk"
-            />
-            <View style={styles.listItemContent}>
-              <Text style={styles.listItemTitle}>{item.name}</Text>
-              <Text style={styles.listItemDesc}>{item.desc || item.description}</Text>
-              <Text style={styles.listItemPrice}>{item.price}</Text>
-            </View>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>CURATED SELECTION</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/menu')}>
+            <Text style={styles.viewAllText}>View All</Text>
           </TouchableOpacity>
-        ))}
+        </View>
+        <View style={styles.curatedGrid}>
+          {allProducts.slice(0, 6).map((item, index) => (
+            <Animated.View 
+              entering={FadeInDown.delay(index * 100 + 400)}
+              key={item.id || index} 
+              style={styles.curatedCard}
+            >
+              <TouchableOpacity 
+                onPress={() => router.push({ pathname: '/drink', params: { id: item.id } })}
+              >
+                <View style={styles.curatedImageContainer}>
+                  <Image 
+                    source={{ uri: item.image || item.image_url }} 
+                    style={styles.curatedImage}
+                    transition={300}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                  />
+                </View>
+                <View style={styles.curatedContent}>
+                  <Text style={styles.curatedTitle} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.curatedPrice}>{item.price}</Text>
+                  <Text style={styles.curatedDesc} numberOfLines={1}>{item.desc || item.description}</Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -341,82 +401,223 @@ const styles = StyleSheet.create({
   headerTitleContainer: {
     flex: 1,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+  },
+  headerIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.colors.surfaceContainer,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: theme.colors.primaryContainer,
   },
-  title: {
+  brandTitle: {
     color: theme.colors.primary,
-    ...theme.typography.headlineMd,
+    ...theme.typography.headlineLg,
+    letterSpacing: 4,
+    fontWeight: '800',
   },
   subtitle: {
-    color: theme.colors.onBackground,
-    ...theme.typography.headlineLg,
-    marginTop: theme.spacing.xs,
+    color: theme.colors.onSurfaceVariant,
+    ...theme.typography.labelMd,
+    marginTop: 4,
   },
   featuredContainer: {
-    marginTop: theme.spacing.md,
+    marginTop: 0,
   },
-  sectionTitle: {
-    color: theme.colors.onBackground,
-    ...theme.typography.headlineMd,
+  categoriesContainer: {
     paddingHorizontal: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    marginBottom: 0,
+    marginTop: 0,
+  },
+  categoriesHeader: {
+    color: theme.colors.onBackground,
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    marginBottom: 24,
+  },
+  categoriesScroll: {
+    flexDirection: 'row',
+  },
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 25,
+    backgroundColor: '#F0F0F0',
+    marginRight: 12,
+  },
+  activeCategoryPill: {
+    backgroundColor: '#C8873A',
+  },
+  categoryText: {
+    color: '#9B9B9B',
+    ...theme.typography.labelMd,
+    fontWeight: '600',
+  },
+  activeCategoryText: {
+    color: 'white',
   },
   featuredScroll: {
     paddingLeft: theme.spacing.md,
+    paddingRight: theme.spacing.md,
+    paddingTop: 50,
   },
-  card: {
-    backgroundColor: theme.colors.surfaceContainer,
-    borderRadius: theme.rounded.lg,
-    marginRight: theme.spacing.sm,
+  featuredCardContainer: {
+    marginRight: theme.spacing.md,
+  },
+  featuredCard: {
     width: 200,
-    overflow: 'hidden',
+    height: 280,
+    borderRadius: 35,
+    backgroundColor: '#3D2510',
+    padding: 20,
+    justifyContent: 'flex-end',
+    // Shadow for elevation
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 10,
   },
-  cardImagePlaceholder: {
-    height: 200,
-    backgroundColor: theme.colors.espresso,
+  featuredImageWrapper: {
+    position: 'absolute',
+    top: -60,
+    left: 20,
+    right: 20,
+    alignItems: 'center',
+    zIndex: 1,
   },
-  cardTitle: {
-    color: theme.colors.onBackground,
-    ...theme.typography.bodyMd,
-    padding: theme.spacing.sm,
+  featuredCircularImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 0,
   },
-  curatedSection: {
-    marginTop: theme.spacing.lg,
+  featuredContent: {
+    marginTop: 60,
   },
-  listItem: {
+  featuredCardTitle: {
+    color: 'white',
+    ...theme.typography.headlineSmall,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  featuredInfoRow: {
+    marginBottom: 12,
+  },
+  ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.surfaceContainer,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    marginBottom: 10,
   },
-  listImagePlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: theme.rounded.sm,
-    backgroundColor: theme.colors.espresso,
+  ratingText: {
+    color: 'white',
+    ...theme.typography.labelMd,
+    marginLeft: 4,
+    fontWeight: 'bold',
   },
-  listItemContent: {
-    flex: 1,
-    marginLeft: theme.spacing.sm,
+  volText: {
+    color: 'rgba(255,255,255,0.8)',
+    ...theme.typography.bodyMedium,
+    fontSize: 14,
   },
-  listItemTitle: {
+  featuredFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  featuredCardPrice: {
+    color: 'white',
+    ...theme.typography.headlineSmall,
+    fontWeight: 'bold',
+  },
+  featuredAddButtonLarge: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  curatedSection: {
+    marginTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.xl,
+    backgroundColor: theme.colors.background,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  sectionTitle: {
     color: theme.colors.onBackground,
-    ...theme.typography.bodyMd,
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: 1.5,
   },
-  listItemDesc: {
-    color: theme.colors.onSurfaceVariant,
-    ...theme.typography.bodySm,
+  viewAllText: {
+    color: theme.colors.primary,
+    ...theme.typography.labelMd,
   },
-  listItemPrice: {
+  curatedGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: theme.spacing.sm,
+  },
+  curatedCard: {
+    width: '50%',
+    padding: theme.spacing.sm,
+  },
+  curatedImageContainer: {
+    height: 180,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: theme.colors.surfaceContainer,
+  },
+  curatedImage: {
+    width: '100%',
+    height: '100%',
+  },
+  curatedContent: {
+    paddingVertical: theme.spacing.md,
+  },
+  curatedTitle: {
+    color: '#FFFFFF',
+    ...theme.typography.labelLg,
+    fontWeight: 'bold',
+  },
+  curatedPrice: {
     color: theme.colors.primary,
     ...theme.typography.bodyMd,
     fontWeight: 'bold',
+    marginVertical: 2,
+  },
+  curatedDesc: {
+    color: '#FFFFFF',
+    ...theme.typography.bodySm,
+    opacity: 0.8,
   },
   errorContainer: {
     padding: theme.spacing.xl,
