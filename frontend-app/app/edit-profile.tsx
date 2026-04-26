@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
-  Alert, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -57,7 +57,7 @@ export default function EditProfileScreen() {
         .select('full_name, username, tagline, dietary_preference, default_cup_size')
         .eq('id', session?.user.id)
         .single();
-      
+
       if (error && error.code !== 'PGRST116') throw error;
       if (data) {
         setFullName(data.full_name || '');
@@ -141,7 +141,7 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
@@ -162,7 +162,7 @@ export default function EditProfileScreen() {
 
         <View style={styles.avatarSection}>
           <View style={styles.avatarContainer}>
-            <Image 
+            <Image
               source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200' }}
               style={styles.avatar}
             />
@@ -217,8 +217,8 @@ export default function EditProfileScreen() {
             <Text style={styles.label}>DIETARY PREFERENCE</Text>
             <View style={styles.chipContainer}>
               {DIETARY_OPTIONS.map(opt => (
-                <TouchableOpacity 
-                  key={opt} 
+                <TouchableOpacity
+                  key={opt}
                   style={[styles.chip, dietary === opt && styles.chipActive]}
                   onPress={() => setDietary(opt)}
                 >
@@ -232,8 +232,8 @@ export default function EditProfileScreen() {
             <Text style={styles.label}>DEFAULT CUP SIZE</Text>
             <View style={styles.chipContainer}>
               {CUP_SIZES.map(opt => (
-                <TouchableOpacity 
-                  key={opt} 
+                <TouchableOpacity
+                  key={opt}
                   style={[styles.chip, cupSize === opt && styles.chipActive]}
                   onPress={() => setCupSize(opt)}
                 >
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: theme.colors.onSurfaceVariant,
-    fontSize: 10,
+    fontSize: 19,
     fontWeight: 'bold',
     letterSpacing: 1,
   },
