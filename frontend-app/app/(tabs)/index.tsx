@@ -60,11 +60,10 @@ export default function HomeScreen() {
       const { data, error } = await supabase.from('products').select('*');
       if (error) throw error;
 
-      const blacklist = ['Gold Leaf Latte', 'Silk Road Matcha', 'matcha-001', 'gold-leaf-uuid'];
+      const blacklist = ['Gold Leaf Latte', 'Silk Road Matcha', 'matcha-001', 'gold-leaf-uuid', 'Saffron Pistachio Latte', '023d4a9d-9329-463e-8e55-7aae836c3f5f'];
       const dbProducts = (data || []).filter(p => !blacklist.includes(p.name) && !blacklist.includes(p.id));
 
       const fallbackFeatured = [
-        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', title: 'Saffron Pistachio Latte', image: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=800' },
         { id: 'rose-001', title: 'Rose Petal Cappuccino', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
         { id: 'turkish-001', title: 'Turkish Delight Mocha', image: 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800' }
       ];
@@ -82,11 +81,13 @@ export default function HomeScreen() {
 
       const uniqueFeatured = [...dbProducts.filter(p => p.is_featured), ...fallbackFeatured.filter(f => !dbProducts.some(p => p.id === f.id))].map(p => {
         const fb = fallbackFeatured.find(f => f.id === p.id);
-        return { ...p, image: p.image || p.image_url || fb?.image };
+        const img = p.image || p.image_url;
+        return { ...p, image: (img && img !== "") ? img : fb?.image };
       });
       const uniqueAll = [...dbProducts, ...fallbackAll.filter(f => !dbProducts.some(p => p.id === f.id))].map(p => {
         const fb = fallbackAll.find(f => f.id === p.id);
-        return { ...p, image: p.image || p.image_url || fb?.image };
+        const img = p.image || p.image_url;
+        return { ...p, image: (img && img !== "") ? img : fb?.image };
       });
 
       setFeaturedProducts(uniqueFeatured.slice(0, 5));

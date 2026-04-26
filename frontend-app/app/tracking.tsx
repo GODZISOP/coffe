@@ -282,7 +282,7 @@ const mapStyle = [
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#161311',
+    backgroundColor: theme.colors.background,
   },
   mapContainer: {
     height: 350,
@@ -310,14 +310,14 @@ const styles = StyleSheet.create({
   },
   markerContainer: {
     padding: 8,
-    backgroundColor: '#D4AF37',
-    borderRadius: 20,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.rounded.xl,
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: theme.colors.onBackground,
   },
   detailsContainer: {
     flex: 1,
-    backgroundColor: '#161311',
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     marginTop: -30,
@@ -333,26 +333,26 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   orderLabel: {
-    color: 'rgba(255,255,255,0.4)',
+    color: theme.colors.onSurfaceVariant,
     fontSize: 12,
     letterSpacing: 2,
   },
   statusText: {
-    color: '#D4AF37',
+    color: theme.colors.primary,
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 4,
   },
   timeBadge: {
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: theme.colors.primaryContainer,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: theme.colors.primary,
   },
   timeText: {
-    color: '#D4AF37',
+    color: theme.colors.onPrimaryContainer,
     fontWeight: 'bold',
   },
   timeline: {
@@ -379,42 +379,42 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#231f1d',
+    backgroundColor: theme.colors.surfaceContainer,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: theme.colors.outline,
   },
   stepDotActive: {
-    backgroundColor: '#D4AF37',
-    borderColor: '#D4AF37',
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   stepContent: {
     marginLeft: 16,
     flex: 1,
   },
   stepTitle: {
-    color: 'rgba(255,255,255,0.5)',
+    color: theme.colors.onSurfaceVariant,
     fontSize: 16,
     fontWeight: 'bold',
   },
   stepTitleActive: {
-    color: 'white',
+    color: theme.colors.onSurface,
   },
   stepSub: {
-    color: 'rgba(255,255,255,0.3)',
+    color: theme.colors.outline,
     fontSize: 13,
     marginTop: 2,
   },
   itemSection: {
-    backgroundColor: '#1e1b19',
+    backgroundColor: theme.colors.surface,
     borderRadius: 20,
     padding: 20,
     marginBottom: 24,
   },
   sectionLabel: {
-    color: 'rgba(255,255,255,0.3)',
+    color: theme.colors.onSurfaceVariant,
     fontSize: 10,
     letterSpacing: 2,
     marginBottom: 16,
@@ -434,17 +434,17 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   itemName: {
-    color: 'white',
+    color: theme.colors.onSurface,
     fontSize: 15,
     fontWeight: 'bold',
   },
   itemOptions: {
-    color: 'rgba(255,255,255,0.4)',
+    color: theme.colors.onSurfaceVariant,
     fontSize: 12,
     marginTop: 2,
   },
   itemPrice: {
-    color: '#D4AF37',
+    color: theme.colors.primary,
     fontWeight: 'bold',
   },
   helpButton: {
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   helpButtonText: {
-    color: '#D4AF37',
+    color: theme.colors.primary,
     fontSize: 13,
     fontWeight: '500',
   },
@@ -462,20 +462,20 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   noOrderTitle: {
-    color: 'white',
+    color: theme.colors.onBackground,
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
   },
   shopButton: {
-    backgroundColor: '#D4AF37',
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 30,
     marginTop: 30,
   },
   shopButtonText: {
-    color: '#161311',
+    color: theme.colors.onPrimary,
     fontWeight: 'bold',
   },
 });

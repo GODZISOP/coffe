@@ -63,7 +63,11 @@ export default function MenuScreen() {
         { id: 'food-002', name: 'Blueberry Ritual Muffin', category: 'Bakery', price: 3.75, description: 'Fresh berries & honey glaze.', image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800' },
       ];
 
-      const combined = [...dbProducts, ...fallbackData.filter(f => !dbProducts.some(p => p.id === f.id))];
+      const combined = [...dbProducts, ...fallbackData.filter(f => !dbProducts.some(p => p.id === f.id))].map(p => {
+        const fb = fallbackData.find(f => f.id === p.id);
+        const img = p.image || p.image_url;
+        return { ...p, image: (img && img !== "") ? img : fb?.image };
+      });
 
       setProducts(combined);
     } catch (e) {
