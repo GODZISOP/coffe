@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const ActionButton = ({ onClick, label, color }: any) => {
   return (
