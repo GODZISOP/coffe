@@ -1,4 +1,3 @@
-import React from 'react';
 import { OrderTable } from '../components/orders/OrderTable';
 
 export const OrdersPage = ({ orders, onUpdate }: any) => {

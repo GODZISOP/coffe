@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader } from '../components/ui/Loader';
+
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<any>;
