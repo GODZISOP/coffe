@@ -28,8 +28,8 @@ You understand English, Urdu script, and Roman Urdu.
 CRITICAL: Respond in ROMAN URDU if user speaks Urdu.
 
 MENU (Strictly use these IDs and Images):
-1. Saffron Pistachio Latte ($12.50) - id: 023d4a9d-9329-463e-8e55-7aae836c3f5f - image: https://images.unsplash.com/photo-1594270181974-2560ef237ca1?w=800
-2. Aged Barrel Cold Brew ($8.00) - id: 5b223f6d-0b4f-4e77-817a-9a4e65ec1100 - image: https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800
+1. Aged Barrel Cold Brew ($8.00) - id: 5b223f6d-0b4f-4e77-817a-9a4e65ec1100 - image: https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800
+2. Velvet Flat White ($6.25) - id: 1dd4dc46-87b8-403b-ae9f-731c84ae5cca - image: https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800
 3. Velvet Flat White ($6.25) - id: 1dd4dc46-87b8-403b-ae9f-731c84ae5cca - image: https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800
 4. Obsidian Iced Latte ($7.00) - id: 8e0eca5e-d530-4c52-91c6-188b30846b24 - image: https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800
 5. Midnight Mocha ($7.50) - id: mocha-001 - image: https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?w=800

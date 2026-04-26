@@ -44,11 +44,10 @@ export default function MenuScreen() {
       const { data, error } = await supabase.from('products').select('*');
       if (error) throw error;
 
-      const blacklist = ['Gold Leaf Latte', 'Silk Road Matcha', 'matcha-001', 'gold-leaf-uuid'];
+      const blacklist = ['Gold Leaf Latte', 'Silk Road Matcha', 'matcha-001', 'gold-leaf-uuid', 'Saffron Pistachio Latte', '023d4a9d-9329-463e-8e55-7aae836c3f5f'];
       const dbProducts = (data || []).filter(p => !blacklist.includes(p.name) && !blacklist.includes(p.id));
 
       const fallbackData = [
-        { id: '023d4a9d-9329-463e-8e55-7aae836c3f5f', name: 'Saffron Pistachio Latte', category: 'Specialty', price: 12.50, description: 'Saffron infused milk with toasted pistachio.', image: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=800' },
         { id: '5b223f6d-0b4f-4e77-817a-9a4e65ec1100', name: 'Aged Barrel Cold Brew', category: 'Coffee', price: 8.00, description: 'Bourbon barrel aged beans.', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
         { id: '1dd4dc46-87b8-403b-ae9f-731c84ae5cca', name: 'Velvet Flat White', category: 'Coffee', price: 6.25, description: 'Smooth, creamy house blend.', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800' },
         { id: '8e0eca5e-d530-4c52-91c6-188b30846b24', name: 'Obsidian Iced Latte', category: 'Specialty', price: 7.00, description: 'Activated charcoal latte.', image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=800' },
