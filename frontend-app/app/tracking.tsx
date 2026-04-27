@@ -151,10 +151,17 @@ export default function OrderTrackingScreen() {
     <View style={styles.container}>
       {/* Map Section */}
       <View style={styles.mapContainer}>
-        <MapView
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={storeRegion}
-        />
+        {Platform.OS === 'ios' ? (
+          <MapView
+            style={StyleSheet.absoluteFillObject}
+            initialRegion={storeRegion}
+          />
+        ) : (
+          <View style={[styles.map, { backgroundColor: theme.colors.surfaceContainer, justifyContent: 'center', alignItems: 'center' }]}>
+            <IconSymbol name="cup.and.saucer.fill" size={48} color={theme.colors.outline} />
+            <Text style={{ color: theme.colors.outline, marginTop: 12, fontWeight: 'bold' }}>RITUAL TRACKING ACTIVE</Text>
+          </View>
+        )}
         
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <IconSymbol name="chevron.left" size={24} color="white" />

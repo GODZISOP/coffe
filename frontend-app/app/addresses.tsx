@@ -170,12 +170,19 @@ export default function AddressesScreen() {
       </View>
 
       <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          region={region}
-          onRegionChangeComplete={handleRegionChangeComplete}
-        />
+        {Platform.OS === 'ios' ? (
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            region={region}
+            onRegionChangeComplete={handleRegionChangeComplete}
+          />
+        ) : (
+          <View style={[styles.map, { backgroundColor: theme.colors.surfaceContainer, justifyContent: 'center', alignItems: 'center' }]}>
+             <IconSymbol name="mappin.circle.fill" size={48} color={theme.colors.primary} />
+             <Text style={{ color: theme.colors.outline, marginTop: 12 }}>Select location on map (iOS only)</Text>
+          </View>
+        )}
         <View style={styles.markerFixed}>
           <IconSymbol name="mappin.circle.fill" size={48} color={theme.colors.primary} />
         </View>
