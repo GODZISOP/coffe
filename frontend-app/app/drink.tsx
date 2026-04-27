@@ -13,7 +13,7 @@ export default function DrinkDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { addToCart } = useCart();
-  
+
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [size, setSize] = useState('Medium');
@@ -34,7 +34,7 @@ export default function DrinkDetailScreen() {
         .select('*')
         .eq('id', id)
         .single();
-      
+
       let productData = data;
       const signatureId = '023d4a9d-9329-463e-8e55-7aae836c3f5f';
 
@@ -72,7 +72,7 @@ export default function DrinkDetailScreen() {
     if (!product) return;
 
     addToCart({
-      id: `${product.id}-${Date.now()}`, 
+      id: `${product.id}-${Date.now()}`,
       name: product.name,
       price: product.price,
       image: product.image_url || product.image,
@@ -95,7 +95,7 @@ export default function DrinkDetailScreen() {
           <Skeleton width="100%" height={16} style={{ marginTop: 12 }} />
           <Skeleton width="90%" height={16} style={{ marginTop: 8 }} />
           <Skeleton width={180} height={40} borderRadius={20} style={{ marginTop: 24 }} />
-          
+
           <View style={{ marginTop: 30 }}>
             <Skeleton width={100} height={20} />
             <View style={[styles.row, { marginTop: 12 }]}>
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: 'center',
     borderRadius: theme.rounded.full,
   },
