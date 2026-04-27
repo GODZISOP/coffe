@@ -16,6 +16,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import * as Location from 'expo-location';
+import { Image } from 'expo-image';
 import { theme } from '../src/styles/theme';
 import { supabase } from '../src/services/supabase';
 import { useAuth } from '../src/context/AuthProvider';
@@ -178,9 +179,16 @@ export default function AddressesScreen() {
             onRegionChangeComplete={handleRegionChangeComplete}
           />
         ) : (
-          <View style={[styles.map, { backgroundColor: theme.colors.surfaceContainer, justifyContent: 'center', alignItems: 'center' }]}>
-             <IconSymbol name="mappin.circle.fill" size={48} color={theme.colors.primary} />
-             <Text style={{ color: theme.colors.outline, marginTop: 12 }}>Select location on map (iOS only)</Text>
+          <View style={styles.map}>
+            <Image 
+              source={require('../assets/images/dummy-map.png')} 
+              style={StyleSheet.absoluteFillObject}
+              contentFit="cover"
+            />
+            <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' }]}>
+               <IconSymbol name="mappin.circle.fill" size={48} color={theme.colors.primary} />
+               <Text style={{ color: 'white', marginTop: 12, fontWeight: 'bold' }}>SET YOUR RITUAL SPOT</Text>
+            </View>
           </View>
         )}
         <View style={styles.markerFixed}>

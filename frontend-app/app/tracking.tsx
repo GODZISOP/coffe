@@ -157,9 +157,16 @@ export default function OrderTrackingScreen() {
             initialRegion={storeRegion}
           />
         ) : (
-          <View style={[styles.map, { backgroundColor: theme.colors.surfaceContainer, justifyContent: 'center', alignItems: 'center' }]}>
-            <IconSymbol name="cup.and.saucer.fill" size={48} color={theme.colors.outline} />
-            <Text style={{ color: theme.colors.outline, marginTop: 12, fontWeight: 'bold' }}>RITUAL TRACKING ACTIVE</Text>
+          <View style={styles.map}>
+            <Image 
+              source={require('../assets/images/dummy-map.png')} 
+              style={StyleSheet.absoluteFillObject}
+              contentFit="cover"
+            />
+            <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }]}>
+              <IconSymbol name="cup.and.saucer.fill" size={48} color={theme.colors.primary} />
+              <Text style={{ color: 'white', marginTop: 12, fontWeight: 'bold', letterSpacing: 2 }}>RITUAL TRACKING ACTIVE</Text>
+            </View>
           </View>
         )}
         
