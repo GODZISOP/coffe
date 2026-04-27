@@ -4,6 +4,10 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 import { useColorScheme } from '../src/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../src/context/AuthProvider';
@@ -22,6 +26,9 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (loading) return;
+    
+    // Hide the splash screen once we are ready
+    SplashScreen.hideAsync();
 
     const inAuthGroup = segments[0] === '(auth)' || segments[0] === 'login' || segments[0] === 'get-started';
 
