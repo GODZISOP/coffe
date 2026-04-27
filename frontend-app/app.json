@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "BREW",
-    "slug": "brew-app",
+    "slug": "coffe-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
