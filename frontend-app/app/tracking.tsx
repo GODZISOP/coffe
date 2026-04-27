@@ -154,18 +154,7 @@ export default function OrderTrackingScreen() {
         <MapView
           style={StyleSheet.absoluteFillObject}
           initialRegion={storeRegion}
-          customMapStyle={mapStyle}
-        >
-          <Marker
-            coordinate={{ latitude: storeRegion.latitude, longitude: storeRegion.longitude }}
-            title="BREW Central"
-            description="Your ritual is being crafted here"
-          >
-            <View style={styles.markerContainer}>
-              <IconSymbol name="cup.and.saucer.fill" size={20} color="white" />
-            </View>
-          </Marker>
-        </MapView>
+        />
         
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <IconSymbol name="chevron.left" size={24} color="white" />

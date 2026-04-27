@@ -25,7 +25,7 @@ import Skeleton from '../src/components/ui/Skeleton';
 const { width, height } = Dimensions.get('window');
 
 // REPLACE THIS WITH YOUR ACTUAL GOOGLE MAPS API KEY
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY_HERE';
+const GOOGLE_MAPS_API_KEY = '';
 
 const LABELS = ['Home', 'Work', 'Other'];
 
