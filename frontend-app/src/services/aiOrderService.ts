@@ -128,7 +128,7 @@ export async function transcribeAudio(audioUri: string, retryCount = 1): Promise
   }
   activeTranscriptionController = new AbortController();
   const controller = activeTranscriptionController;
-  const timeoutId = setTimeout(() => controller.abort(), 120000); 
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
     const fileInfo = await FileSystem.getInfoAsync(audioUri);
@@ -138,7 +138,7 @@ export async function transcribeAudio(audioUri: string, retryCount = 1): Promise
 
     const formData = new FormData();
     const filename = audioUri.split('/').pop() || 'recording.m4a';
-    
+
     // @ts-ignore
     formData.append('file', {
       uri: Platform.OS === 'ios' ? audioUri.replace('file://', '') : audioUri,
@@ -157,14 +157,18 @@ export async function transcribeAudio(audioUri: string, retryCount = 1): Promise
     });
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[STT] Transcription API Error:', response.status, errorData);
+      
       if (retryCount > 0 && response.status >= 500) {
         console.warn(`[STT] Server error ${response.status}, retrying...`);
         return transcribeAudio(audioUri, retryCount - 1);
       }
-      throw new Error(`Transcription failed: ${response.status}`);
+      throw new Error(`Transcription failed (${response.status}): ${errorData.error?.message || 'Unknown error'}`);
     }
 
     const data = await response.json();
+    console.log('[STT] Transcription successful:', data.text?.substring(0, 30) + '...');
     return data.text?.trim() || '';
   } catch (error: any) {
     if (error.name === 'AbortError') {

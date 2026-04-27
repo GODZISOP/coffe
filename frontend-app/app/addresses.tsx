@@ -13,7 +13,7 @@ import {
   ScrollView
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import * as Location from 'expo-location';
 import { theme } from '../src/styles/theme';
@@ -172,7 +172,6 @@ export default function AddressesScreen() {
       <View style={styles.mapContainer}>
         <MapView
           ref={mapRef}
-          provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={region}
           onRegionChangeComplete={handleRegionChangeComplete}

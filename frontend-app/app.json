@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "coffe-app",
-    "slug": "coffe-app",
+    "name": "BREW",
+    "slug": "brew-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,6 +13,9 @@
     },
     "android": {
       "package": "com.coffeapp.brew",
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+      },
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

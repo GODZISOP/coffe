@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { theme } from '../src/styles/theme';
 import { IconSymbol } from '../src/components/ui/IconSymbol';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -145,14 +145,13 @@ export default function OrderTrackingScreen() {
     );
   }
 
-  const currentStep = getStatusStep(order.status);
+  const currentStep = getStatusStep(order?.status || 'pending');
 
   return (
     <View style={styles.container}>
       {/* Map Section */}
       <View style={styles.mapContainer}>
         <MapView
-          provider={Platform.OS === 'android' ? undefined : PROVIDER_GOOGLE}
           style={StyleSheet.absoluteFillObject}
           initialRegion={storeRegion}
           customMapStyle={mapStyle}
@@ -211,7 +210,7 @@ export default function OrderTrackingScreen() {
 
         <View style={styles.itemSection}>
           <Text style={styles.sectionLabel}>YOUR SELECTION</Text>
-          {order.items.map((item: any, idx: number) => {
+          {order.items?.map((item: any, idx: number) => {
             const itemImg = item.image || item.image_url;
             const imageUrl = itemImg?.startsWith('http') 
               ? itemImg 
