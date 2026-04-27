@@ -73,7 +73,7 @@ export default function AppLoader() {
         
         {/* Central Icon */}
         <Animated.View style={[styles.iconContainer, iconStyle]}>
-          <IconSymbol name="star.fill" size={48} color={theme.colors.primary} />
+          <IconSymbol name="cup.and.saucer.fill" size={48} color={theme.colors.primary} />
           
           {/* Animated Steam */}
           <View style={styles.steamContainer}>
@@ -97,7 +97,7 @@ export default function AppLoader() {
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: theme.colors.background,
+    backgroundColor: '#1A0F0A',
     zIndex: 9999,
     justifyContent: 'center',
     alignItems: 'center',
